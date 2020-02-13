@@ -12,9 +12,19 @@ library(dplyr)
 ####################################################
 ## Data
 ####################################################
+
+# Choose the work directory = folder
+if (Sys.info()["sysname"] == "Darwin"){
+  mainBasePath <- "/Users/raphaelaussenac/Documents/GitHub/divStabCC"
+  setwd(mainBasePath)
+} else if (Sys.info()["sysname"] == "Windows"){
+  mainBasePath <- "C:/Users/raphael.aussenac/Documents/GitHub/divStabCC"
+  setwd(mainBasePath)
+}
+
 sp <- "SAB"
-load("~/owncloud/Work_directory/Analysis/chapitre_3/03_mixed_model/RUN_MODEL/dataBAI.rdata")
-source("~/owncloud/Work_directory/Analysis/chapitre_3/03_mixed_model/climate_change/11_fun_model.r")
+load("./data/dataBAI.rdata")
+source("./src/11_fun_model.r")
 data <- prepare_mod_data(sp = sp)
 
 # mise en forme tel que lmer/lm le fait (permet de prendre en compte les facteurs --> 0/1)
@@ -46,7 +56,7 @@ form <- lBAI ~ texture2 + texture2:drainage2 + texture3:drainage2 + mixE:BAtot_C
 ## Run model
 ####################################################
 
-speed <- "lent"
+speed <- "rapid"
 
 if (speed == "rapid"){
   mod <-  lmer(form, data=data, REML = FALSE, control = lmerControl(optimizer = "bobyqa", calc.derivs = FALSE, optCtrl = list(maxfun = 500)))

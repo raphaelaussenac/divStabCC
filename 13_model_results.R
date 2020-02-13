@@ -18,10 +18,20 @@ library(dplyr)
 ####################################################
 ## Model
 ####################################################
+
+# Choose the work directory = folder
+if (Sys.info()["sysname"] == "Darwin"){
+  mainBasePath <- "/Users/raphaelaussenac/Documents/GitHub/divStabCC"
+  setwd(mainBasePath)
+} else if (Sys.info()["sysname"] == "Windows"){
+  mainBasePath <- "C:/Users/raphael.aussenac/Documents/GitHub/divStabCC"
+  setwd(mainBasePath)
+}
+
 # data
-load("~/owncloud/Work_directory/Analysis/chapitre_3/03_mixed_model/output/mod_SAB_lent_fin.rdata")
+load("./modelOutput/mod_SAB_rapid_fin.rdata")
 modSAB <- mod
-load("~/owncloud/Work_directory/Analysis/chapitre_3/03_mixed_model/output/mod_PET_lent_fin.rdata")
+load("./modelOutput/mod_PET_rapid_fin.rdata")
 modPET <- mod
 
 # ####################################################
@@ -215,7 +225,7 @@ dot(data = modPET, sp = "PET", inter = "del")
 dot(data = modSAB, sp = "SAB", inter = "keep")
 dot(data = modPET, sp = "PET", inter = "keep")
 
-quartz.save("~/Desktop/dochart.pdf", type = "pdf", width = 8, height = 12, device = dev.cur())
+# quartz.save("~/Desktop/dochart.pdf", type = "pdf", width = 8, height = 12, device = dev.cur())
 
 # ####################################################
 # ## plot CI
@@ -236,9 +246,9 @@ quartz.save("~/Desktop/dochart.pdf", type = "pdf", width = 8, height = 12, devic
 # library(piecewiseSEM)
 
 # package piecewiseSEM
-library(piecewiseSEM)
-sem.model.fits(mod)
-rsquared(mod)
+# library(piecewiseSEM)
+# sem.model.fits(mod)
+# rsquared(mod)
 
 # package MuMIn
 library(MuMIn)
