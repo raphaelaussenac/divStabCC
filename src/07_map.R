@@ -8,10 +8,10 @@ options(digits=16)
 
 # Choose the work directory = folder
 if (Sys.info()["sysname"] == "Darwin"){
-  basePath <- "/Users/raphaelaussenac/Documents/GitHub/climate_change/data"
+  basePath <- "/Users/raphaelaussenac/Documents/GitHub/divStabCC/data"
   setwd(basePath)
 } else if (Sys.info()["sysname"] == "Windows"){
-  basePath <- "C:/Users/raphael.aussenac/Documents/GitHub/climate_change/data"
+  basePath <- "C:/Users/raphael.aussenac/Documents/GitHub/divStabCC/data"
   setwd(basePath)
 }
 
@@ -33,9 +33,9 @@ library(ggplot2)
 
 # Set your API Key (get API key on google cloud platform)
 if (Sys.info()["sysname"] == "Darwin"){
-  path <- "/Users/raphaelaussenac/Documents/GitHub/climate_change/src/googleAPI.R"
+  path <- "/Users/raphaelaussenac/Documents/GitHub/divStabCC/src/googleAPI.R"
 } else if (Sys.info()["sysname"] == "Windows"){
-  path <- "C:/Users/raphael.aussenac/Documents/GitHub/climate_change/src/googleAPI.R"
+  path <- "C:/Users/raphael.aussenac/Documents/GitHub/divStabCC/src/googleAPI.R"
 }
 source(path)
 

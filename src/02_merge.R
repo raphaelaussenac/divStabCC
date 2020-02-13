@@ -7,10 +7,10 @@ rm(list=ls())
 ####################################################
 # Choose the work directory = folder
 if (Sys.info()["sysname"] == "Darwin"){
-  basePath <- "/Users/raphaelaussenac/Documents/GitHub/climate_change/data"
+  basePath <- "/Users/raphaelaussenac/Documents/GitHub/divStabCC/data"
   setwd(basePath)
 } else if (Sys.info()["sysname"] == "Windows"){
-  basePath <- "C:/Users/raphael.aussenac/Documents/GitHub/climate_change/data"
+  basePath <- "C:/Users/raphael.aussenac/Documents/GitHub/divStabCC/data"
   setwd(basePath)
 }
 
