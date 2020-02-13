@@ -1,5 +1,5 @@
 # Delete all objects in the work space
-rm(list=ls())
+rm(list=setdiff(ls(), "mainBasePath"))
 
 
 ####################################################
