@@ -11,8 +11,17 @@ library(plyr)
 library(merTools)
 library(doParallel)
 
+# Choose the work directory = folder
+if (Sys.info()["sysname"] == "Darwin"){
+  mainBasePath <- "/Users/raphaelaussenac/Documents/GitHub/divStabCC"
+  setwd(mainBasePath)
+} else if (Sys.info()["sysname"] == "Windows"){
+  mainBasePath <- "C:/Users/raphael.aussenac/Documents/GitHub/divStabCC"
+  setwd(mainBasePath)
+}
+
 # function preparation données futures
-source("~/owncloud/Work_directory/Analysis/chapitre_3/03_mixed_model/climate_change/11_fun_model.r")
+source("./src/11_fun_model.r")
 
 ####################################################
 ## new data
@@ -32,17 +41,27 @@ new <- function(data = data){
 ####################################################
 ##
 ####################################################
-setwd("~/owncloud/Work_directory/Analysis/chapitre_3/03_mixed_model/input/futur_climate/all_climate_data")
+setwd("./data/futurClimate/allClimateData")
 fileNames <- Sys.glob("*.rdata")
 fileNames
+
+# Choose the work directory = folder
+if (Sys.info()["sysname"] == "Darwin"){
+  mainBasePath <- "/Users/raphaelaussenac/Documents/GitHub/divStabCC"
+  setwd(mainBasePath)
+} else if (Sys.info()["sysname"] == "Windows"){
+  mainBasePath <- "C:/Users/raphael.aussenac/Documents/GitHub/divStabCC"
+  setwd(mainBasePath)
+}
+
 
 pred_mod <- function(s = c("SAB", "PET")){
 
   # load model
   if (s == "SAB"){
-    load("~/owncloud/Work_directory/Analysis/chapitre_3/03_mixed_model/output/mod_SAB_lent_fin.rdata")
+    load("./modelOutput/mod_SAB_lent_fin.rdata")
   } else if (s == "PET"){
-    load("~/owncloud/Work_directory/Analysis/chapitre_3/03_mixed_model/output/mod_PET_lent_fin.rdata")
+    load("./modelOutput/mod_PET_lent_fin.rdata")
   }
 
   # predictions
@@ -50,7 +69,7 @@ pred_mod <- function(s = c("SAB", "PET")){
   predictions <- as.data.frame(matrix(ncol = 9 + nsim))
   colnames(predictions) <- c("ID_PET_MES", "ID_ARB", "ESSENCE", "prop_SAB_BA","prop_PET_BA", "yr", paste("V", seq(1,nsim,1), sep=""), "rcp", "mod", "rcpmod" )
   for (i in fileNames){
-    load(i)
+    load(paste(getwd(), "/data/futurClimate/allClimateData/",i, sep = ""))
     data <- new(data)
     sp <- s
     newdata <- prepare_mod_data_futur(data = data, sp = sp)
@@ -78,9 +97,27 @@ pred_mod <- function(s = c("SAB", "PET")){
   predictions <- predictions[-1, ]
 
   # save
-  setwd("~/owncloud/Work_directory/Analysis/chapitre_3/03_mixed_model/output")
+  # setwd("~/owncloud/Work_directory/Analysis/chapitre_3/03_mixed_model/output")
+  # Choose the work directory = folder
+  if (Sys.info()["sysname"] == "Darwin"){
+    mainBasePath <- "/Users/raphaelaussenac/Documents/GitHub/divStabCC/modelOutput"
+    setwd(mainBasePath)
+  } else if (Sys.info()["sysname"] == "Windows"){
+    mainBasePath <- "C:/Users/raphael.aussenac/Documents/GitHub/divStabCC/modelOutput"
+    setwd(mainBasePath)
+  }
+
   save(predictions, file = paste("QC_BAI_", s, "_T1D2", ".rdata", sep = "")) # change name according to T and D
-  setwd("~/owncloud/Work_directory/Analysis/chapitre_3/03_mixed_model/input/futur_climate/all_climate_data")
+
+  # setwd("./data/futurClimate/allClimateData")
+  # Choose the work directory = folder
+  if (Sys.info()["sysname"] == "Darwin"){
+    mainBasePath <- "/Users/raphaelaussenac/Documents/GitHub/divStabCC"
+    setwd(mainBasePath)
+  } else if (Sys.info()["sysname"] == "Windows"){
+    mainBasePath <- "C:/Users/raphael.aussenac/Documents/GitHub/divStabCC"
+    setwd(mainBasePath)
+  }
 
 }
 

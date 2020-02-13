@@ -8,12 +8,20 @@ library(ggplot2)
 # Data
 ####################################################
 # File list
-setwd("~/owncloud/Work_directory/Analysis/chapitre_3/03_mixed_model/output")
+# Choose the work directory = folder
+if (Sys.info()["sysname"] == "Darwin"){
+  mainBasePath <- "/Users/raphaelaussenac/Documents/GitHub/divStabCC/modelOutput"
+  setwd(mainBasePath)
+} else if (Sys.info()["sysname"] == "Windows"){
+  mainBasePath <- "C:/Users/raphael.aussenac/Documents/GitHub/divStabCC/modelOutput"
+  setwd(mainBasePath)
+}
+# setwd("~/owncloud/Work_directory/Analysis/chapitre_3/03_mixed_model/output")
 
 ####################################################
 # plot plot
 ####################################################
-load("chronoplotT0D0.rdata")
+load("chronoplotT1D2.rdata")
 
 ggplot(data = chronoplot)+
 geom_ribbon(aes(x=yr, ymax=BAImax, ymin=BAImin, fill = rcp), alpha = 0.2)+
@@ -23,12 +31,12 @@ ylab("total BAI")+
 facet_wrap(~ plot, nrow = 1, scales="free_y",  labeller = as_labeller(c("all" = "a) all stands", "MIX" = "b) mixed stands", "PET" = "c) pure aspen stands", "SAB" = "d) pure fir stands")))+
 theme_bw()+
 theme(strip.background = element_rect(colour = "white", fill = "white"), legend.position = "bottom", legend.title = element_blank())
-ggsave (paste("~/Desktop/chap3/plot/plot", ".pdf", sep = ""), width = 8, height= 5)
+# ggsave (paste("~/Desktop/chap3/plot/plot", ".pdf", sep = ""), width = 8, height= 5)
 
 ####################################################
 # plot sp
 ####################################################
-load("chronospT0D0.rdata")
+load("chronospT1D2.rdata")
 
 ggplot(data = chronosp)+
 geom_ribbon(aes(x=yr, ymax=BAImax, ymin=BAImin, fill = rcp), alpha = 0.2)+
@@ -38,7 +46,7 @@ ylab("total BAI")+
 facet_wrap(~ a, nrow = 1, scales="free_y")+
 theme_bw()+
 theme(strip.background = element_rect(colour = "white", fill = "white"), legend.position = "bottom", legend.title = element_blank())
-ggsave (paste("~/Desktop/chap3/plot/sp", ".pdf", sep = ""), width = 8, height= 5)
+# ggsave (paste("~/Desktop/chap3/plot/sp", ".pdf", sep = ""), width = 8, height= 5)
 
 ####################################################
 # All plots
@@ -62,7 +70,7 @@ ylab("total BAI")+
 facet_wrap(soil ~ plot, scales = "free", ncol = 2)+
 theme_bw()+
 theme(strip.background = element_rect(colour = "white", fill = "white"), legend.position = "bottom", legend.title = element_blank())
-ggsave ("~/Desktop/chap3/plot/allplot.pdf", width = 8, height= 15)
+# ggsave ("~/Desktop/chap3/plot/allplot.pdf", width = 8, height= 15)
 
 ####################################################
 # All sp
@@ -86,7 +94,7 @@ ylab("total BAI")+
 facet_wrap(soil ~ a, scales = "free", ncol = 4)+
 theme_bw()+
 theme(strip.background = element_rect(colour = "white", fill = "white"), legend.position = "bottom", legend.title = element_blank())
-ggsave ("~/Desktop/chap3/plot/allsp.pdf", width = 8, height= 15)
+# ggsave ("~/Desktop/chap3/plot/allsp.pdf", width = 8, height= 15)
 
 ####################################################
 # Diff
@@ -110,4 +118,4 @@ ylab("total BAI")+
 facet_wrap(soil ~ plot, scales = "free", ncol = 2)+
 theme_bw()+
 theme(strip.background = element_rect(colour = "white", fill = "white"), legend.position = "bottom", legend.title = element_blank())
-ggsave ("~/Desktop/chap3/plot/diffsp.pdf", width = 8, height= 15)
+# ggsave ("~/Desktop/chap3/plot/diffsp.pdf", width = 8, height= 15)

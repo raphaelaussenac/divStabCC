@@ -20,8 +20,7 @@ if (Sys.info()["sysname"] == "Darwin"){
 }
 
 # liste_sites_clim_futur
-sites <- read.table("~/owncloud/Work_directory/Analysis/chapitre_3/03_mixed_model/input/futur_climate/liste_sites_clim_futur.csv", sep=",", header=T)
-sites <- read.table("./data/liste_sites.csv", sep=",", header=T)
+sites <- read.table("./data/futurClimate/liste_sites_clim_futur.csv", sep=",", header=T)
 
 range(nchar(sites$ID_PET_MES))
 sites$ID_PET_MES <- formatC(sites$ID_PET_MES, width = 12, format = "fg", flag = "0")
@@ -103,7 +102,7 @@ length(unique(data$ID_ARB))
 ####################################################
 ## Format climatic data for all models
 ####################################################
-setwd("~/owncloud/Work_directory/Analysis/chapitre_3/03_mixed_model/input/futur_climate/all_climate_data")
+setwd("./data/futurClimate/allClimateData")
 fileNames <- Sys.glob("*.csv")
 fileNames
 

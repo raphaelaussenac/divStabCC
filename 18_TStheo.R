@@ -288,7 +288,15 @@ TStheo <- function(PET = PET, SAB = SAB, soil = soil){
 ####################################################
 
 # File list
-setwd("~/owncloud/Work_directory/Analysis/chapitre_3/03_mixed_model/output")
+# setwd("~/owncloud/Work_directory/Analysis/chapitre_3/03_mixed_model/output")
+# Choose the work directory = folder
+if (Sys.info()["sysname"] == "Darwin"){
+  mainBasePath <- "/Users/raphaelaussenac/Documents/GitHub/divStabCC/modelOutput"
+  setwd(mainBasePath)
+} else if (Sys.info()["sysname"] == "Windows"){
+  mainBasePath <- "C:/Users/raphael.aussenac/Documents/GitHub/divStabCC/modelOutput"
+  setwd(mainBasePath)
+}
 PETs <- Sys.glob("QC_BAI_PET*")
 SABs <- Sys.glob("QC_BAI_SAB*")
 

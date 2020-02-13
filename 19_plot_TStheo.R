@@ -8,14 +8,21 @@ library(ggplot2)
 # Data
 ####################################################
 # File list
-setwd("~/owncloud/Work_directory/Analysis/chapitre_3/03_mixed_model/output")
+# Choose the work directory = folder
+if (Sys.info()["sysname"] == "Darwin"){
+  mainBasePath <- "/Users/raphaelaussenac/Documents/GitHub/divStabCC/modelOutput"
+  setwd(mainBasePath)
+} else if (Sys.info()["sysname"] == "Windows"){
+  mainBasePath <- "C:/Users/raphael.aussenac/Documents/GitHub/divStabCC/modelOutput"
+  setwd(mainBasePath)
+}
 
 ####################################################
 # TS, mean, var plot QC
 ####################################################
 
 for (i in c("mean", "variance", "TS")){
-  load(paste(i, "theoT0D0.rdata", sep = ""))
+  load(paste(i, "theoT1D2.rdata", sep = ""))
 
   ggplot()+
   geom_ribbon(data = p, aes(x = psab, ymax = Ymax, ymin = Ymin, fill = RCP), alpha = 0.5)+
@@ -26,7 +33,7 @@ for (i in c("mean", "variance", "TS")){
   xlab("proportion of fir")+
   ylab("") #component)
 
-  ggsave(paste("~/Desktop/", i, "theoT0D0.pdf", sep = ""), width = 8, height = 5)
+  # ggsave(paste("~/Desktop/", i, "theoT1D2.pdf", sep = ""), width = 8, height = 5)
 
 }
 

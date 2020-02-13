@@ -195,9 +195,9 @@ prepare_mod_data_futur <- function(data = data, sp=sp){
   ####################################################
   # load unscaled parameters
   if (sp=="PET"){
-    load("~/owncloud/Work_directory/Analysis/chapitre_3/03_mixed_model/output/meas_PET.rdata")
+    load("./data/meas_PET.rdata")
   } else if (sp=="SAB"){
-    load("~/owncloud/Work_directory/Analysis/chapitre_3/03_mixed_model/output/meas_SAB.rdata")
+    load("./data/meas_SAB.rdata")
   }
 
   # meas$sizeE <- scale(meas$sizeE)
