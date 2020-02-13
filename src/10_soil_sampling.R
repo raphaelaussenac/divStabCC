@@ -131,7 +131,7 @@ grid.arrange(p1, p2, ncol=2)
 ## save
 ####################################################
 
-# save(data, file="~/owncloud/Work_directory/Analysis/chapitre_3/03_mixed_model/RUN_MODEL/dataBAI.rdata")
+save(data, file="./dataBAI.rdata")
 
 
 ####################################################
