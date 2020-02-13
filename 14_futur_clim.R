@@ -5,18 +5,30 @@ rm(list=ls(all=TRUE))
 ## Data & Packages
 ####################################################
 # Packages
+detach("package:dplyr", unload=TRUE) # unload dplyr package if loaded / error message if not previously loaded
 library(plyr) # pour la fonction "ddply"
 library(reshape2) # pour la fonction melt
 library(ggplot2)
 
+# Choose the work directory = folder
+if (Sys.info()["sysname"] == "Darwin"){
+  mainBasePath <- "/Users/raphaelaussenac/Documents/GitHub/divStabCC"
+  setwd(mainBasePath)
+} else if (Sys.info()["sysname"] == "Windows"){
+  mainBasePath <- "C:/Users/raphael.aussenac/Documents/GitHub/divStabCC"
+  setwd(mainBasePath)
+}
+
 # liste_sites_clim_futur
 sites <- read.table("~/owncloud/Work_directory/Analysis/chapitre_3/03_mixed_model/input/futur_climate/liste_sites_clim_futur.csv", sep=",", header=T)
+sites <- read.table("./data/liste_sites.csv", sep=",", header=T)
+
 range(nchar(sites$ID_PET_MES))
 sites$ID_PET_MES <- formatC(sites$ID_PET_MES, width = 12, format = "fg", flag = "0")
 range(nchar(sites$ID_PET_MES))
 
 # growth data + present clim,
-load("~/owncloud/Work_directory/Analysis/chapitre_3/03_mixed_model/RUN_MODEL/dataBAI.rdata")
+load("./data/dataBAI.rdata")
 #DHP_CM = dbhmax
 DHP_CM <- ddply(data, .(ID_PET_MES, ID_ARB), summarise, DHP_CM=max(DHP_CM))
 prop_SAB_BA <- ddply(data, .(ID_PET_MES, ID_ARB), summarise, prop_SAB_BA=unique(prop_SAB_BA))

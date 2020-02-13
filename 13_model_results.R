@@ -29,9 +29,9 @@ if (Sys.info()["sysname"] == "Darwin"){
 }
 
 # data
-load("./modelOutput/mod_SAB_rapid_fin.rdata")
+load("./modelOutput/mod_SAB_lent_fin.rdata")
 modSAB <- mod
-load("./modelOutput/mod_PET_rapid_fin.rdata")
+load("./modelOutput/mod_PET_lent_fin.rdata")
 modPET <- mod
 
 # ####################################################
@@ -258,7 +258,7 @@ round(r.squaredGLMM(mod), digits = 2)
 ####################################################
 ## Effect displays
 ####################################################
-allEffects(mod)
+allEffects(mod) # récupèrer objet mod qui est produit dans "run_model"
 plot(allEffects(mod))
 
 

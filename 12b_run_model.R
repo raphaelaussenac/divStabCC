@@ -17,7 +17,7 @@ load("./data/dataBAI.rdata")
 source("./src/11_fun_model.r")
 sp <- "PET"
 data <- prepare_mod_data(sp = sp)
-speed <- "rapid" # rapid/lent
+speed <- "lent" # rapid/lent
 
 mod <- run_mod_fin(speed = speed, sp = sp)
 if (speed=="rapid"){
@@ -33,7 +33,7 @@ load("./data/dataBAI.rdata")
 source("./src/11_fun_model.r")
 sp <- "SAB"
 data <- prepare_mod_data(sp = sp)
-speed <- "rapid" # rapid/lent
+speed <- "lent" # rapid/lent
 
 mod <- run_mod_fin(speed = speed, sp = sp)
 if (speed=="rapid"){

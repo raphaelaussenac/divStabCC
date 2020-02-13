@@ -160,8 +160,8 @@ dot(data = mod, sp = sp)
 ####################################################
 ## R2 c & m
 ####################################################
-sem.model.fits(mod)
-rsquared(mod)
+# sem.model.fits(mod)
+# rsquared(mod)
 r.squaredGLMM(mod)
 
 #
