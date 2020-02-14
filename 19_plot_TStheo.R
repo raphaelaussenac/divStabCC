@@ -51,11 +51,11 @@ for (i in 2:length(multimean)){
 pmean1$variable <- "mean"
 
 # plot
-ggplot(data = pmean1)+
+ggplot(data = pmean1[pmean1$soil != 'T0D0', ])+
 geom_ribbon(aes(x=psab, ymax=Ymax, ymin=Ymin, fill = RCP), alpha = 0.2)+
 xlab("proportion of fir")+
 ylab("")+
-facet_wrap( ~ plotp, scales = "fixed", ncol = 4)+
+facet_grid(soil ~ plotp, scales = "fixed")+
 theme_bw()+
 theme(strip.background = element_rect(colour = "white", fill = "white"), legend.position = "bottom", legend.title = element_blank())
 # ggsave ("~/Desktop/chap3/plot/allplot.pdf", width = 8, height= 15)
@@ -74,11 +74,11 @@ for (i in 2:length(multivariance)){
 pvariance1$variable <- "variance"
 
 # plot
-ggplot(data = pvariance1)+
+ggplot(data = pvariance1[pvariance1$soil != 'T0D0', ])+
 geom_ribbon(aes(x=psab, ymax=Ymax, ymin=Ymin, fill = RCP), alpha = 0.2)+
 xlab("proportion of fir")+
 ylab("")+
-facet_wrap( ~ plotp, scales = "fixed", ncol = 4)+
+facet_grid(soil ~ plotp, scales = "free")+
 theme_bw()+
 theme(strip.background = element_rect(colour = "white", fill = "white"), legend.position = "bottom", legend.title = element_blank())
 # ggsave ("~/Desktop/chap3/plot/allplot.pdf", width = 8, height= 15)
@@ -104,7 +104,7 @@ ggplot(data = pTS1[pTS1$soil != 'T0D0',])+
 geom_ribbon(aes(x=psab, ymax=Ymax, ymin=Ymin, fill = RCP), alpha = 0.2)+
 xlab("proportion of fir")+
 ylab("")+
-facet_wrap( ~ plotp, scales = "free", ncol = 4)+
+facet_grid(soil ~ plotp, scales = "fixed")+
 theme_bw()+
 theme(strip.background = element_rect(colour = "white", fill = "white"), legend.position = "bottom", legend.title = element_blank())
 # ggsave ("~/Desktop/chap3/plot/allplot.pdf", width = 8, height= 15)

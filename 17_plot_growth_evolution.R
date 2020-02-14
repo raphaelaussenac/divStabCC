@@ -67,7 +67,7 @@ geom_ribbon(aes(x=yr, ymax=BAImax, ymin=BAImin, fill = rcp), alpha = 0.2)+
 geom_ribbon(aes(x=yr, ymax=CImax, ymin=CImin, fill = rcp), alpha = 0.5)+
 xlab("year")+
 ylab("total BAI")+
-facet_wrap(soil ~ plot, scales = "free", ncol = 2)+
+facet_grid(soil ~ plot, scales = "free")+
 theme_bw()+
 theme(strip.background = element_rect(colour = "white", fill = "white"), legend.position = "bottom", legend.title = element_blank())
 # ggsave ("~/Desktop/chap3/plot/allplot.pdf", width = 8, height= 15)
@@ -91,7 +91,7 @@ geom_ribbon(aes(x=yr, ymax=BAImax, ymin=BAImin, fill = rcp), alpha = 0.2)+
 geom_ribbon(aes(x=yr, ymax=CImax, ymin=CImin, fill = rcp), alpha = 0.5)+
 xlab("year")+
 ylab("total BAI")+
-facet_wrap(soil ~ a, scales = "free", ncol = 4)+
+facet_grid(soil ~ a, scales = "free")+
 theme_bw()+
 theme(strip.background = element_rect(colour = "white", fill = "white"), legend.position = "bottom", legend.title = element_blank())
 # ggsave ("~/Desktop/chap3/plot/allsp.pdf", width = 8, height= 15)
@@ -115,7 +115,7 @@ geom_ribbon(aes(x=yr, ymax=BAImax, ymin=BAImin, fill = rcp), alpha = 0.2)+
 geom_ribbon(aes(x=yr, ymax=CImax, ymin=CImin, fill = rcp), alpha = 0.5)+
 xlab("year")+
 ylab("total BAI")+
-facet_wrap(soil ~ plot, scales = "free", ncol = 2)+
+facet_grid(soil ~ plot, scales = "free")+
 theme_bw()+
 theme(strip.background = element_rect(colour = "white", fill = "white"), legend.position = "bottom", legend.title = element_blank())
 # ggsave ("~/Desktop/chap3/plot/diffsp.pdf", width = 8, height= 15)

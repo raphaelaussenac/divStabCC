@@ -62,23 +62,23 @@ TStheo <- function(PET = PET, SAB = SAB, soil = soil){
 
   # total chronology for stands
   stand <- ddply(data, .(yr, rcpmod, sim, mix, period), summarise, BAI = sum(BAI))
-  ggplot()+
-  geom_line(data = stand, aes(yr, BAI, color = rcpmod))+
-  facet_grid(sim ~ mix, scale = "fixed")
+  # ggplot()+
+  # geom_line(data = stand, aes(yr, BAI, color = rcpmod))+
+  # facet_grid(sim ~ mix, scale = "fixed")
 
   # total chronology for species
   # PET
   PET <- ddply(data[data$ESSENCE == "PET",], .(yr, rcpmod, sim, mix, period), summarise, BAI = sum(BAI))
   PET <- PET[PET$mix != "SAB",]
-  ggplot()+
-  geom_line(data = PET, aes(yr, BAI, color = rcpmod))+
-  facet_grid(sim ~ mix, scale = "fixed")
+  # ggplot()+
+  # geom_line(data = PET, aes(yr, BAI, color = rcpmod))+
+  # facet_grid(sim ~ mix, scale = "fixed")
   # SAB
   SAB <- ddply(data[data$ESSENCE == "SAB",], .(yr, rcpmod, sim, mix, period), summarise, BAI = sum(BAI))
   SAB <- SAB[SAB$mix != "PET",]
-  ggplot()+
-  geom_line(data = SAB, aes(yr, BAI, color = rcpmod))+
-  facet_grid(sim ~ mix, scale = "fixed")
+  # ggplot()+
+  # geom_line(data = SAB, aes(yr, BAI, color = rcpmod))+
+  # facet_grid(sim ~ mix, scale = "fixed")
 
 
   TS <- function(period = "p1", rcpmod = "rcp45_ACCES", psab = 0.5, ppet = 0.5, sim = "V1"){
@@ -144,7 +144,7 @@ TStheo <- function(PET = PET, SAB = SAB, soil = soil){
   a <- TS(period = "p1", rcpmod = "rcp45_ACCES", psab = 0.5, ppet = 0.5, sim = "V1")
 
   # combinations of proportions
-  prop <- data.frame(ppet = seq(0,1, 0.4))
+  prop <- data.frame(ppet = seq(0,1, 0.01))
   prop$psab <- 1 - prop$ppet
 
 
