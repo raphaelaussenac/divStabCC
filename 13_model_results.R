@@ -72,7 +72,7 @@ modPET <- mod
 # dotchart
 dot <- function(data = data, sp = sp, inter = "del"){
   # bayesian estimation of the parameters
-  nsim <- 2000
+  nsim <- 10000
   bsim <- sim(data, n.sim=nsim)
   #str(bsim)
   par <- round(apply(bsim@fixef,2,quantile, prob=c(0.025, 0.5, 0.975)), digits=3)

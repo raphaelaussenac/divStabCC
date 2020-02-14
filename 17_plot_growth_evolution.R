@@ -21,7 +21,7 @@ if (Sys.info()["sysname"] == "Darwin"){
 ####################################################
 # plot plot
 ####################################################
-load("chronoplotT1D2.rdata")
+load("chronoplotT0D0.rdata")
 
 ggplot(data = chronoplot)+
 geom_ribbon(aes(x=yr, ymax=BAImax, ymin=BAImin, fill = rcp), alpha = 0.2)+
@@ -36,7 +36,7 @@ theme(strip.background = element_rect(colour = "white", fill = "white"), legend.
 ####################################################
 # plot sp
 ####################################################
-load("chronospT1D2.rdata")
+load("chronospT0D0.rdata")
 
 ggplot(data = chronosp)+
 geom_ribbon(aes(x=yr, ymax=BAImax, ymin=BAImin, fill = rcp), alpha = 0.2)+
@@ -110,7 +110,7 @@ for (i in 2:length(multidiff)){
 }
 
 # plot
-ggplot(data = diff1)+
+ggplot(data = diff1[diff1$soil != "T0D0",])+
 geom_ribbon(aes(x=yr, ymax=BAImax, ymin=BAImin, fill = rcp), alpha = 0.2)+
 geom_ribbon(aes(x=yr, ymax=CImax, ymin=CImin, fill = rcp), alpha = 0.5)+
 xlab("year")+

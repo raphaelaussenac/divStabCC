@@ -22,7 +22,7 @@ if (Sys.info()["sysname"] == "Darwin"){
 ####################################################
 
 for (i in c("mean", "variance", "TS")){
-  load(paste(i, "theoT1D2.rdata", sep = ""))
+  load(paste(i, "theoT0D0.rdata", sep = ""))
 
   ggplot()+
   geom_ribbon(data = p, aes(x = psab, ymax = Ymax, ymin = Ymin, fill = RCP), alpha = 0.5)+
@@ -33,7 +33,7 @@ for (i in c("mean", "variance", "TS")){
   xlab("proportion of fir")+
   ylab("") #component)
 
-  # ggsave(paste("~/Desktop/", i, "theoT1D2.pdf", sep = ""), width = 8, height = 5)
+  # ggsave(paste("~/Desktop/", i, "theoT0D0.pdf", sep = ""), width = 8, height = 5)
 
 }
 
@@ -100,7 +100,7 @@ pTS1$variable <- "TS"
 
 
 # plot
-ggplot(data = pTS1)+
+ggplot(data = pTS1[pTS1$soil != 'T0D0',])+
 geom_ribbon(aes(x=psab, ymax=Ymax, ymin=Ymin, fill = RCP), alpha = 0.2)+
 xlab("proportion of fir")+
 ylab("")+
