@@ -129,9 +129,11 @@ foreach(i = 1:length(spe), .packages = "merTools", .export = c("new", "prepare_m
 }
 
 # unregister cluster
-registerDoSEQ()
+stopCluster(cl)
 
+# registerDoSEQ()
 #
+# 
 # unregister <- function() {
 #   env <- foreach:::.foreachGlobals
 #   rm(list=ls(name=env), pos=env)
