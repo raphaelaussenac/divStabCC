@@ -122,7 +122,8 @@ pred_mod <- function(s = c("SAB", "PET")){
 }
 
 # We replicated the addresses nCores times.
-registerDoParallel(2)
+cl <- makePSOCKcluster(2)
+registerDoParallel(cl)
 spe <- c("SAB", "PET")
 foreach(i = 1:length(spe), .packages = "merTools", .export = c("new", "prepare_mod_data_futur", "fileNames")) %dopar% {
   pred_mod(s = spe[i])
@@ -133,7 +134,7 @@ stopCluster(cl)
 
 # registerDoSEQ()
 #
-# 
+#
 # unregister <- function() {
 #   env <- foreach:::.foreachGlobals
 #   rm(list=ls(name=env), pos=env)
