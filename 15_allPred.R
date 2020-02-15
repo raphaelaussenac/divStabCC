@@ -12,7 +12,7 @@ if (Sys.info()["sysname"] == "Darwin"){
 
 tex <- 1
 dra <- 1
-source(./model_pred.R)
+source('./model_pred.R')
 
 ########################################################################################################
 
@@ -30,7 +30,7 @@ if (Sys.info()["sysname"] == "Darwin"){
 
 tex <- 1
 dra <- 2
-source(./model_pred.R)
+source('./model_pred.R')
 
 ########################################################################################################
 # Delete all objects in the work space
@@ -47,7 +47,7 @@ if (Sys.info()["sysname"] == "Darwin"){
 
 tex <- 2
 dra <- 1
-source(./model_pred.R)
+source('./model_pred.R')
 
 ########################################################################################################
 
@@ -65,7 +65,7 @@ if (Sys.info()["sysname"] == "Darwin"){
 
 tex <- 2
 dra <- 2
-source(./model_pred.R)
+source('./model_pred.R')
 
 ########################################################################################################
 # Delete all objects in the work space
@@ -82,7 +82,7 @@ if (Sys.info()["sysname"] == "Darwin"){
 
 tex <- 3
 dra <- 1
-source(./model_pred.R)
+source('./model_pred.R')
 
 ########################################################################################################
 
@@ -100,6 +100,6 @@ if (Sys.info()["sysname"] == "Darwin"){
 
 tex <- 3
 dra <- 2
-source(./model_pred.R)
+source('./model_pred.R')
 
 ########################################################################################################
