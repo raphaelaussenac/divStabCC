@@ -31,8 +31,8 @@ new <- function(data = data){
   data$prop_PET_BA <- data$prop_PET_BA
   data$prop_SAB_BA <- data$prop_SAB_BA
   data$BAtot_CM2HA <- data$BAtot_CM2HA
-  data$texture <- as.factor(tex) # 1, 2, 3 ou data$texture = 0
-  data$drainage <- as.factor(dra) # 1, 2, ou data$drainage = 0
+  data$texture <- as.factor(data$texture) # 1, 2, 3 ou data$texture = 0
+  data$drainage <- as.factor(data$drainage) # 1, 2, ou data$drainage = 0
   data$compethard <- data$compethard
   data$competsoft <- data$competsoft
   return(data)
@@ -84,10 +84,8 @@ pred_mod <- function(s = c("SAB", "PET")){
     pred <- predictInterval(mod, newdata = newdata, which = "fixed", level = 0.95, n.sims = nsim, stat = "median", include.resid.var = TRUE, returnSims = TRUE)
     pred <- as.data.frame(attr(pred, "sim.results"))
     newdata <- cbind(newdata, pred)
-    # newdata$BAI <- exp(pred)
-    # newdata$BAI <- exp(pred$fit)
-    # newdata$upr <- exp(pred$upr)
-    # newdata$lwr <- exp(pred$lwr)
+    # exp(log(BAI+1))
+    newdata[, paste("V", seq(1,nsim,1), sep="")] <- exp(newdata[, paste("V", seq(1,nsim,1), sep="")]) - exp(log(1))
     newdata$rcp <- substr(i, 1, 5)
     newdata$mod <- substr(i, 7, 11)
     newdata$rcpmod <- substr(i, 1, 11)
@@ -107,7 +105,7 @@ pred_mod <- function(s = c("SAB", "PET")){
     setwd(mainBasePath)
   }
 
-  save(predictions, file = paste("QC_BAI_", s, "_T", tex, "D", dra, ".rdata", sep = "")) # change name according to T and D
+  save(predictions, file = paste("QC_BAI_", s, "_T0D0", ".rdata", sep = "")) # change name according to T and D
 
   # setwd("./data/futurClimate/allClimateData")
   # Choose the work directory = folder

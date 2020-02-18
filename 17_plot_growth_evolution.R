@@ -31,7 +31,7 @@ ylab("total BAI")+
 facet_wrap(~ plot, nrow = 1, scales="free_y",  labeller = as_labeller(c("all" = "a) all stands", "MIX" = "b) mixed stands", "PET" = "c) pure aspen stands", "SAB" = "d) pure fir stands")))+
 theme_bw()+
 theme(strip.background = element_rect(colour = "white", fill = "white"), legend.position = "bottom", legend.title = element_blank())
-# ggsave (paste("~/Desktop/chap3/plot/plot", ".pdf", sep = ""), width = 8, height= 5)
+# ggsave (paste("~/Desktop/plot", ".pdf", sep = ""), width = 8, height= 5)
 
 ####################################################
 # plot sp
@@ -46,7 +46,7 @@ ylab("total BAI")+
 facet_wrap(~ a, nrow = 1, scales="free_y")+
 theme_bw()+
 theme(strip.background = element_rect(colour = "white", fill = "white"), legend.position = "bottom", legend.title = element_blank())
-# ggsave (paste("~/Desktop/chap3/plot/sp", ".pdf", sep = ""), width = 8, height= 5)
+# ggsave (paste("~/Desktop/sp", ".pdf", sep = ""), width = 8, height= 5)
 
 ####################################################
 # All plots
