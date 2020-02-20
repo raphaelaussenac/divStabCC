@@ -252,70 +252,85 @@ dot(data = modPET, sp = "PET", inter = "keep")
 
 # package MuMIn
 library(MuMIn)
-round(r.squaredGLMM(mod), digits = 2)
+round(r.squaredGLMM(modSAB), digits = 2)
+round(r.squaredGLMM(modPET), digits = 2)
 # r.squaredLR(mod)
 
 ####################################################
 ## Effect displays
 ####################################################
-allEffects(mod) # récupèrer objet mod qui est produit dans "run_model"
-plot(allEffects(mod))
+library(sjPlot)
+library(sjmisc)
+library(ggplot2)
+theme_set(theme_sjplot())
 
 
-eff <- as.data.frame(Effect(c("competsoft","DC"),mod, se=T))  ## competsoft, competsoft toujours en premier
-colnames(eff)[colnames(eff)=="fit"] <- "lBAI"
-plot(Effect(c("competsoft","DC"),mod, se=T))
 
+plot_model(modSAB, type = "pred", terms = c("DC", "texture", "competsoft"))
 
-eff$competsoft <- factor(eff$competsoft, levels= sort(unique(eff$competsoft)),ordered = TRUE)
-
-ggplot(eff, aes(x=DC,y=lBAI,group=competsoft)) +
-geom_line(aes(color=as.integer(as.character(competsoft)))) +
-# facet_grid(. ~ plotsppar, scales = "free", space = "fixed", switch = "x")
-scale_colour_gradient(name = "competsoft", low = "green", high = "red")+
-theme(axis.ticks = element_line(colour="black"),
-axis.text.y = element_text(size= 13, angle=0, hjust=0.5),
-axis.text.x = element_text(size= 13, angle=0, hjust=0.5),
-axis.title.y = element_text(size = 15, angle = 90),
-panel.background=element_blank(),
-panel.grid.major.x=element_blank(),
-panel.grid.major.y=element_line(colour="grey90"),
-# panel.grid.major = element_line(colour="white"),
-legend.key=element_rect(colour = "white", fill=NA),
-panel.grid.minor = element_blank(),
-panel.border=element_rect(colour = "black", fill=NA),
-strip.background = element_rect(colour="white",fill="white"),
-# strip.text.x = element_text(colour = "black", angle = 0, size = 10, hjust = 0.5, vjust = 0.5),
-strip.text.x = element_blank(),
-panel.margin = unit(0.25, "lines"))+
-# plot.margin = unit(c(0,0,0,0),"mm"))+
-xlab("DC")+
-ylab("log(BAI)")
-# ggtitle("Fixed effects values (absolute values)")
-
-
-####################################################
-## Beta
-####################################################
-
-# SAB
-load("~/owncloud/Work_directory/Analysis/chapitre_3/03_mixed_model/RUN_MODEL/RE on slopes/SAB_DBH_beta/resultGA.rdata")
-GA@solution
-# beta
-C <- GA@solution[1]        # [0,10]
-D <- GA@solution[2]      # [0,10]
-curve(  (x^(C-1)) * ((1-x)^(D-1)), xlim=c(0,1), col="red", main="beta(DBH)", xlab="proportion", ylab="")
-axis(1, at = seq(0, 1, by = 0.1), las=1)
-
-# PET
-load("~/owncloud/Work_directory/Analysis/chapitre_3/03_mixed_model/RUN_MODEL/RE on slopes/PET_DBH_beta/resultGA.rdata")
-GA@solution
-# beta
-C <- GA@solution[1]        # [0,10]
-D <- GA@solution[2]      # [0,10]
-curve(  (x^(C-1)) * ((1-x)^(D-1)), xlim=c(0,1), add=T, col="green")
+plot_model(modSAB, type = "int")
 
 
 #
-abline(v= 0.41, type='p', col="red", lty=2)
-abline(v= 0.51, type='p', col="green", lty=2)
+#
+# allEffects(mod) # récupèrer objet mod qui est produit dans "run_model"
+# plot(allEffects(mod))
+#
+#
+# eff <- as.data.frame(Effect(c("competsoft","DC"),mod, se=T))  ## competsoft, competsoft toujours en premier
+# colnames(eff)[colnames(eff)=="fit"] <- "lBAI"
+# plot(Effect(c("competsoft","DC"),mod, se=T))
+#
+#
+# eff$competsoft <- factor(eff$competsoft, levels= sort(unique(eff$competsoft)),ordered = TRUE)
+#
+# ggplot(eff, aes(x=DC,y=lBAI,group=competsoft)) +
+# geom_line(aes(color=as.integer(as.character(competsoft)))) +
+# # facet_grid(. ~ plotsppar, scales = "free", space = "fixed", switch = "x")
+# scale_colour_gradient(name = "competsoft", low = "green", high = "red")+
+# theme(axis.ticks = element_line(colour="black"),
+# axis.text.y = element_text(size= 13, angle=0, hjust=0.5),
+# axis.text.x = element_text(size= 13, angle=0, hjust=0.5),
+# axis.title.y = element_text(size = 15, angle = 90),
+# panel.background=element_blank(),
+# panel.grid.major.x=element_blank(),
+# panel.grid.major.y=element_line(colour="grey90"),
+# # panel.grid.major = element_line(colour="white"),
+# legend.key=element_rect(colour = "white", fill=NA),
+# panel.grid.minor = element_blank(),
+# panel.border=element_rect(colour = "black", fill=NA),
+# strip.background = element_rect(colour="white",fill="white"),
+# # strip.text.x = element_text(colour = "black", angle = 0, size = 10, hjust = 0.5, vjust = 0.5),
+# strip.text.x = element_blank(),
+# panel.margin = unit(0.25, "lines"))+
+# # plot.margin = unit(c(0,0,0,0),"mm"))+
+# xlab("DC")+
+# ylab("log(BAI)")
+# # ggtitle("Fixed effects values (absolute values)")
+#
+#
+# ####################################################
+# ## Beta
+# ####################################################
+#
+# # SAB
+# load("~/owncloud/Work_directory/Analysis/chapitre_3/03_mixed_model/RUN_MODEL/RE on slopes/SAB_DBH_beta/resultGA.rdata")
+# GA@solution
+# # beta
+# C <- GA@solution[1]        # [0,10]
+# D <- GA@solution[2]      # [0,10]
+# curve(  (x^(C-1)) * ((1-x)^(D-1)), xlim=c(0,1), col="red", main="beta(DBH)", xlab="proportion", ylab="")
+# axis(1, at = seq(0, 1, by = 0.1), las=1)
+#
+# # PET
+# load("~/owncloud/Work_directory/Analysis/chapitre_3/03_mixed_model/RUN_MODEL/RE on slopes/PET_DBH_beta/resultGA.rdata")
+# GA@solution
+# # beta
+# C <- GA@solution[1]        # [0,10]
+# D <- GA@solution[2]      # [0,10]
+# curve(  (x^(C-1)) * ((1-x)^(D-1)), xlim=c(0,1), add=T, col="green")
+#
+#
+# #
+# abline(v= 0.41, type='p', col="red", lty=2)
+# abline(v= 0.51, type='p', col="green", lty=2)

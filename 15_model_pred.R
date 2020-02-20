@@ -77,11 +77,11 @@ pred_mod <- function(s = c("SAB", "PET")){
     pred <- as.data.frame(attr(pred, "sim.results"))
     newdata <- cbind(newdata, pred)
     rm(pred) # free up memory
-    # exp(log(BAI+1))
+    # back transforming predictions: exp(log(BAI+1))
     newdata[, paste("V", seq(1,nsim,1), sep="")] <- exp(newdata[, paste("V", seq(1,nsim,1), sep="")]) - exp(log(1))
-    newdata$rcp <- substr(i, 1, 5)
-    newdata$mod <- substr(i, 7, 11)
-    newdata$rcpmod <- substr(i, 1, 11)
+    newdata$rcp <- substr(i, nchar(i)-16, nchar(i)-12)
+    newdata$mod <- substr(i, nchar(i)-10, nchar(i)-6)
+    newdata$rcpmod <- substr(i, nchar(i)-16, nchar(i)-6)
     model <- newdata[, colnames(predictions)]
     rm(newdata) # free up memory
     predictions <- rbind(predictions, model)
