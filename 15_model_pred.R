@@ -89,7 +89,7 @@ pred_mod <- function(s = c("SAB", "PET")){
   }
   predictions <- predictions[-1, ]
 
-  save(predictions, file = paste(getwd(), "/modelOutput/", "QC_BAI_", s, "_T", "tex", "D", "dra", ".rdata", sep = "")) # change name according to T and D
+  save(predictions, file = paste(getwd(), "/modelOutput/", "QC_BAI_", s, "_T", tex, "D", dra, ".rdata", sep = "")) # change name according to T and D
 
 }
 
@@ -103,6 +103,17 @@ spe <- c("SAB", "PET")
 foreach(i = 1:length(spe), .packages = "merTools") %dopar% {
   pred_mod(s = spe[i])
 }
+
+# this part might not be usefull ----------------
+unregister <- function() {
+  env <- foreach:::.foreachGlobals
+  rm(list=ls(name=env), pos=env)
+}
+unregister()
+# -------------------------------------------------
+
+stopCluster(cl)
+
 
 end_time <- Sys.time()
 end_time - start_time
