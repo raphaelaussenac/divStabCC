@@ -262,15 +262,6 @@ run_mod <- function(speed=c("rapid", "lent")){
 
 run_mod_fin <- function(speed = c("rapid", "lent"), sp = c("PET", "SAB")){
 
-  # form <- lBAI_CM ~ sizeE + DC + DCp + Tannual + Pannual + compethard + competsoft + texture + drainage +
-  #                   compethard:DC + compethard:DCp + compethard:Tannual + compethard:Pannual +
-  #                   competsoft:DC + competsoft:DCp + competsoft:Tannual + competsoft:Pannual +
-  #                   texture:DC + texture:DCp + texture:Tannual + texture:Pannual +
-  #                   drainage:DC + drainage:DCp + drainage:Tannual + drainage:Pannual +
-  #                   drainage:compethard + drainage:competsoft +
-  #                   texture:compethard + texture:competsoft +
-  #                   (1 | ID_PET_MES / ID_ARB)
-  #
   form <- lBAI_CM ~ sizeE + DC + Tannual + Pannual + compethard + competsoft + texture + drainage +
                     compethard:DC + compethard:Tannual + compethard:Pannual +
                     competsoft:DC + competsoft:Tannual + competsoft:Pannual +

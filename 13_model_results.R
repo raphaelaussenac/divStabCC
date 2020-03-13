@@ -123,46 +123,78 @@ dot <- function(data = data, sp = sp, inter = "del"){
   par <- par[order(par$mean),]
 
   # Change variable name
-  par$param[par$param == "(Intercept)"] <- "    intercept "
-  # avant les deux points
-  par$param[substr(par$param, 1, 7) == "texture"] <- paste("T", substr(par$param[substr(par$param, 1, 7) == "texture"], 8, nchar(par$param[substr(par$param, 1, 7) == "texture"])), sep = "")
-
-  par$param[substr(par$param, 1, 8) == "drainage"] <- paste("D", substr(par$param[substr(par$param, 1, 8) == "drainage"], 9, nchar(par$param[substr(par$param, 1, 8) == "drainage"])), sep = "")
-
-  par$param[substr(par$param, 1, 5) == "sizeE"] <- paste("DBH", substr(par$param[substr(par$param, 1, 5) == "sizeE"], 6, nchar(par$param[substr(par$param, 1, 5) == "sizeE"])), sep = "")
-
-  par$param[substr(par$param, 1, 4) == "mixE"] <- paste("Pr", substr(par$param[substr(par$param, 1, 4) == "mixE"], 5, nchar(par$param[substr(par$param, 1, 4) == "mixE"])), sep = "")
-
-  par$param[substr(par$param, 1, 2) == "DC"] <- paste("DCm", substr(par$param[substr(par$param, 1, 2) == "DC"], 3, nchar(par$param[substr(par$param, 1, 2) == "DC"])), sep = "")
-
-  par$param[substr(par$param, 1, 3) == "DCp"] <- paste("DCmp", substr(par$param[substr(par$param, 1, 3) == "DCp"], 4, nchar(par$param[substr(par$param, 1, 3) == "DCp"])), sep = "")
-
-  # avant les deux points
-  # compethard / soft
-  par$param[substr(par$param, 4, 14) == "compethard"] <- paste(substr(par$param[substr(par$param, 4, 14) == "compethard"], 1, 3), "Ch", sep = "")
-  par$param[substr(par$param, 4, 14) == "competsoft"] <- paste(substr(par$param[substr(par$param, 4, 14) == "competsoft"], 1, 3), "Cs", sep = "")
-  par$param[substr(par$param, 5, 15) == "compethard"] <- paste(substr(par$param[substr(par$param, 5, 15) == "compethard"], 1, 4), "Ch", sep = "")
-  par$param[substr(par$param, 5, 15) == "competsoft"] <- paste(substr(par$param[substr(par$param, 5, 15) == "competsoft"], 1, 4), "Cs", sep = "")
-  par$param[substr(par$param, 6, 16) == "compethard"] <- paste(substr(par$param[substr(par$param, 6, 16) == "compethard"], 1, 5), "Ch", sep = "")
-  par$param[substr(par$param, 6, 16) == "competsoft"] <- paste(substr(par$param[substr(par$param, 6, 16) == "competsoft"], 1, 5), "Cs", sep = "")
-  # drainage
-  par$param[substr(par$param, 4, 11) == "drainage"] <- paste(substr(par$param[substr(par$param, 4, 11) == "drainage"], 1, 3), "D", substr(par$param[substr(par$param, 4, 11) == "drainage"], 12, 12), sep = "")
-  # P & T annual
-  par$param[substr(par$param, 4, 10) == "Pannual"] <- paste(substr(par$param[substr(par$param, 4, 10) == "Pannual"], 1, 3), "Pan", sep = "")
-  par$param[substr(par$param, 4, 10) == "Tannual"] <- paste(substr(par$param[substr(par$param, 4, 10) == "Tannual"], 1, 3), "Tan", sep = "")
-  # DC & DCp
-  par$param[substr(par$param, 4, 6) == "DC"] <- paste(substr(par$param[substr(par$param, 4, 6) == "DC"], 1, 3), "DCm", sep = "")
-  par$param[substr(par$param, 5, 7) == "DC"] <- paste(substr(par$param[substr(par$param, 5, 7) == "DC"], 1, 4), "DCm", sep = "")
-
-
-  par$param[substr(par$param, 4, 7) == "DCp"] <- paste(substr(par$param[substr(par$param, 4, 7) == "DCp"], 1, 3), "DCmp", sep = "")
-  par$param[substr(par$param, 5, 8) == "DCp"] <- paste(substr(par$param[substr(par$param, 5, 8) == "DCp"], 1, 4), "DCmp", sep = "")
+  par$param[par$param == "(Intercept)"] <- "int.       "
+  par$param[par$param == "competsoft"] <- "Cs"
+  par$param[par$param == "competsoft:drainage2"] <- "Cs.D2"
+  par$param[par$param == "compethard"] <- "Ch"
+  par$param[par$param == "compethard:texture3"] <- "Ch.T3"
+  par$param[par$param == "DC:texture3"] <- "DC.T3"
+  par$param[par$param == "DC:texture2"] <- "DC.T2"
+  par$param[par$param == "Pannual:drainage2"] <- "Pan.D2"
+  par$param[par$param == "DC:competsoft"] <- "DC.Cs"
+  par$param[par$param == "Tannual"] <- "Tan"
+  par$param[par$param == "Tannual:competsoft"] <- "Tan.Cs"
+  par$param[par$param == "Tannual:drainage2"] <- "Tan.D2"
+  par$param[par$param == "DC:compethard"] <- "DC.Ch"
+  par$param[par$param == "competsoft:texture3"] <- "Cs.T3"
+  par$param[par$param == "Tannual:compethard"] <- "Tan.Ch"
+  par$param[par$param == "DC:drainage2"] <- "DC.D2"
+  par$param[par$param == "Tannual:texture3"] <- "Tan.T3"
+  par$param[par$param == "Pannual:compethard"] <- "Pan.Ch"
+  par$param[par$param == "Pannual:competsoft"] <- "Pan.Cs"
+  par$param[par$param == "Pannual"] <- "Pan"
+  par$param[par$param == "Pannual:texture3"] <- "Pan.T3"
+  par$param[par$param == "Pannual:texture2"] <- "Pan.T2"
+  par$param[par$param == "Tannual:texture2"] <- "Tan.T2"
+  par$param[par$param == "texture3"] <- "T3"
+  par$param[par$param == "compethard:texture2"] <- "Ch.T2"
+  par$param[par$param == "DC"] <- "DC"
+  par$param[par$param == "competsoft:texture2"] <- "Cs.T2"
+  par$param[par$param == "compethard:drainage2"] <- "Ch.D2"
+  par$param[par$param == "drainage2"] <- "D2"
+  par$param[par$param == "texture2"] <- "T2"
+  par$param[par$param == "sizeE"] <- "DBH"
 
 
-  # MixE sizeE BAtot
-  par$param[substr(par$param, 4, 8) == "mixE"] <- paste(substr(par$param[substr(par$param, 4, 8) == "mixE"], 1, 3), "Pr", sep = "")
-  par$param[substr(par$param, 4, 9) == "sizeE"] <- paste(substr(par$param[substr(par$param, 4, 9) == "sizeE"], 1, 3), "DBH", sep = "")
-  par$param[substr(par$param, 4, 15) == "BAtot_CM2HA"] <- paste(substr(par$param[substr(par$param, 4, 15) == "BAtot_CM2HA"], 1, 3), "BAt", sep = "")
+  # # avant les deux points
+  # par$param[substr(par$param, 1, 7) == "texture"] <- paste("T", substr(par$param[substr(par$param, 1, 7) == "texture"], 8, nchar(par$param[substr(par$param, 1, 7) == "texture"])), sep = "")
+  #
+  # par$param[substr(par$param, 1, 8) == "drainage"] <- paste("D", substr(par$param[substr(par$param, 1, 8) == "drainage"], 9, nchar(par$param[substr(par$param, 1, 8) == "drainage"])), sep = "")
+  #
+  # par$param[substr(par$param, 1, 5) == "sizeE"] <- paste("DBH", substr(par$param[substr(par$param, 1, 5) == "sizeE"], 6, nchar(par$param[substr(par$param, 1, 5) == "sizeE"])), sep = "")
+  #
+  # par$param[substr(par$param, 1, 4) == "mixE"] <- paste("Pr", substr(par$param[substr(par$param, 1, 4) == "mixE"], 5, nchar(par$param[substr(par$param, 1, 4) == "mixE"])), sep = "")
+  #
+  # par$param[substr(par$param, 1, 2) == "DC"] <- paste("DCm", substr(par$param[substr(par$param, 1, 2) == "DC"], 3, nchar(par$param[substr(par$param, 1, 2) == "DC"])), sep = "")
+  #
+  # par$param[substr(par$param, 1, 3) == "DCp"] <- paste("DCmp", substr(par$param[substr(par$param, 1, 3) == "DCp"], 4, nchar(par$param[substr(par$param, 1, 3) == "DCp"])), sep = "")
+  #
+  # # avant les deux points
+  # # compethard / soft
+  # par$param[substr(par$param, 4, 14) == "compethard"] <- paste(substr(par$param[substr(par$param, 4, 14) == "compethard"], 1, 3), "Ch", sep = "")
+  # par$param[substr(par$param, 4, 14) == "competsoft"] <- paste(substr(par$param[substr(par$param, 4, 14) == "competsoft"], 1, 3), "Cs", sep = "")
+  # par$param[substr(par$param, 5, 15) == "compethard"] <- paste(substr(par$param[substr(par$param, 5, 15) == "compethard"], 1, 4), "Ch", sep = "")
+  # par$param[substr(par$param, 5, 15) == "competsoft"] <- paste(substr(par$param[substr(par$param, 5, 15) == "competsoft"], 1, 4), "Cs", sep = "")
+  # par$param[substr(par$param, 6, 16) == "compethard"] <- paste(substr(par$param[substr(par$param, 6, 16) == "compethard"], 1, 5), "Ch", sep = "")
+  # par$param[substr(par$param, 6, 16) == "competsoft"] <- paste(substr(par$param[substr(par$param, 6, 16) == "competsoft"], 1, 5), "Cs", sep = "")
+  # # drainage
+  # par$param[substr(par$param, 4, 11) == "drainage"] <- paste(substr(par$param[substr(par$param, 4, 11) == "drainage"], 1, 3), "D", substr(par$param[substr(par$param, 4, 11) == "drainage"], 12, 12), sep = "")
+  # # P & T annual
+  # par$param[substr(par$param, 4, 10) == "Pannual"] <- paste(substr(par$param[substr(par$param, 4, 10) == "Pannual"], 1, 3), "Pan", sep = "")
+  # par$param[substr(par$param, 4, 10) == "Tannual"] <- paste(substr(par$param[substr(par$param, 4, 10) == "Tannual"], 1, 3), "Tan", sep = "")
+  # # DC & DCp
+  # par$param[substr(par$param, 4, 6) == "DC"] <- paste(substr(par$param[substr(par$param, 4, 6) == "DC"], 1, 3), "DCm", sep = "")
+  # par$param[substr(par$param, 5, 7) == "DC"] <- paste(substr(par$param[substr(par$param, 5, 7) == "DC"], 1, 4), "DCm", sep = "")
+  #
+  #
+  # par$param[substr(par$param, 4, 7) == "DCp"] <- paste(substr(par$param[substr(par$param, 4, 7) == "DCp"], 1, 3), "DCmp", sep = "")
+  # par$param[substr(par$param, 5, 8) == "DCp"] <- paste(substr(par$param[substr(par$param, 5, 8) == "DCp"], 1, 4), "DCmp", sep = "")
+  #
+  #
+  # # MixE sizeE BAtot
+  # par$param[substr(par$param, 4, 8) == "mixE"] <- paste(substr(par$param[substr(par$param, 4, 8) == "mixE"], 1, 3), "Pr", sep = "")
+  # par$param[substr(par$param, 4, 9) == "sizeE"] <- paste(substr(par$param[substr(par$param, 4, 9) == "sizeE"], 1, 3), "DBH", sep = "")
+  # par$param[substr(par$param, 4, 15) == "BAtot_CM2HA"] <- paste(substr(par$param[substr(par$param, 4, 15) == "BAtot_CM2HA"], 1, 3), "BAt", sep = "")
 
   # a <- c("(Intercept)", "sizeE", "mixE", "compethard", "competsoft", "DC", "DCp", "Pannual", "Tannual", "drainage2", "texture2", "texture3")
   # b <- c("compethard:DC", "compethard:DCp", "competsoft:DC", "competsoft:DCp", "mixE:BAtot_CM2HA", "mixE:DC", "mixE:DCp", "sizeE:DC", "sizeE:DCp")
@@ -225,7 +257,7 @@ dot(data = modPET, sp = "PET", inter = "del")
 dot(data = modSAB, sp = "SAB", inter = "keep")
 dot(data = modPET, sp = "PET", inter = "keep")
 
-# quartz.save("~/Desktop/dochart.pdf", type = "pdf", width = 8, height = 12, device = dev.cur())
+# quartz.save("~/Desktop/dotchart.png", type = "png", width = 8, height = 9, device = dev.cur())
 
 # ####################################################
 # ## plot CI
@@ -266,7 +298,11 @@ theme_set(theme_sjplot())
 
 
 
-plot_model(modSAB, type = "pred", terms = c("DC", "texture", "competsoft"))
+plot_model(modPET, type = "pred", terms = c("DC", "compethard"))
+
+
+
+plot_model(modPET, type = "pred", terms = c("DC", "drainage", "compethard"))
 
 plot_model(modSAB, type = "int")
 
