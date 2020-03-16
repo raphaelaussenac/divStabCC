@@ -32,6 +32,10 @@ load(file="./dataBAIcompetfilt.rdata")
 ## Tmean & Pmean (annual)
 ####################################################
 
+# select specific months
+clim$month <- substr(clim$Date, 6,7)
+clim <- clim[clim$month %in% c('6-', '7-', '8-'), ]
+
 Tannual <- ddply(clim, .(ID, yr), summarise, Tannual=mean(TMean))
 Tannual$plotyr <- paste(Tannual$ID, Tannual$yr, sep="")
 Tannual_save <- Tannual
