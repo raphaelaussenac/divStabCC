@@ -29,23 +29,39 @@ load(file="./dataBAIcompetfilt.rdata")
 
 
 ####################################################
-## Tmean & Pmean (annual)
+## Tmean (annual)
 ####################################################
 
-# select specific months
-clim$month <- substr(clim$Date, 6,7)
-clim <- clim[clim$month %in% c('6-', '7-', '8-'), ]
-
 Tannual <- ddply(clim, .(ID, yr), summarise, Tannual=mean(TMean))
+# calculate annual Temperature for previous year
+Tannual$Tp <- NA
+for (i in Tannual$ID){
+  Tannual[Tannual$ID == i, 'Tp'] <- c(NA, Tannual[Tannual$ID == i, 'Tannual'][1: length(Tannual[Tannual$ID == i, 'Tannual'])-1])
+}
+Tannual <- Tannual[!is.na(Tannual$Tp),]
 Tannual$plotyr <- paste(Tannual$ID, Tannual$yr, sep="")
 Tannual_save <- Tannual
-Tannual <- Tannual[, 3:4]
+Tannual <- Tannual[, 3:5]
+
+####################################################
+## Pmean (annual)
+####################################################
+
 Pannual <- ddply(clim, .(ID, yr), summarise, Pannual=sum(TotalPrecip))
+# calculate annual Temperature for previous year
+Pannual$Pp <- NA
+for (i in Pannual$ID){
+  Pannual[Pannual$ID == i, 'Pp'] <- c(NA, Pannual[Pannual$ID == i, 'Pannual'][1: length(Pannual[Pannual$ID == i, 'Pannual'])-1])
+}
+Pannual <- Pannual[!is.na(Pannual$Pp),]
 Pannual$plotyr <- paste(Pannual$ID, Pannual$yr, sep="")
 Pannual_save <- Pannual
-Pannual <- Pannual[, 3:4]
+Pannual <- Pannual[, 3:5]
 
-# merge clim data with growth data
+####################################################
+## merge clim data with growth data
+####################################################
+
 data$plotyr <- paste(data$ID_PET_MES, data$AN_CERNE, sep="")
 data <- merge(data, Tannual, by = "plotyr")
 data <- merge(data, Pannual, by = "plotyr")

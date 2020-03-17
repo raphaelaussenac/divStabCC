@@ -108,6 +108,10 @@ prepare_mod_data <- function(sp=sp){
   meas$Pannual <- scale(meas$Pannual)
   meas$DC <- scale(meas$DC)
   meas$DCp <- scale(meas$DCp)
+  meas$Tp <- scale(meas$Tp)
+  meas$Pp <- scale(meas$Pp)
+  meas$Pperiod <- scale(meas$Pperiod)
+  meas$Tperiod <- scale(meas$Tperiod)
   meas$competRatio <- scale(meas$competRatio)
   meas$competTot <- scale(meas$competTot)
   return(meas)
@@ -279,27 +283,27 @@ run_mod <- function(speed=c("rapid", "lent")){
 
 run_mod_fin <- function(speed = c("rapid", "lent"), sp = c("PET", "SAB")){
 
-  form <- lBAI_CM ~ sizeE + DC + Tannual + Pannual + compethard + competsoft + texture + drainage +
-                    compethard:DC + compethard:Tannual + compethard:Pannual +
-                    competsoft:DC + competsoft:Tannual + competsoft:Pannual +
-                    # sizeE:DC + sizeE:Tannual + sizeE:Pannual +
-                    # texture:DC + texture:Tannual + texture:Pannual +
-                    # drainage:DC + drainage:Tannual + drainage:Pannual +
-                    # drainage:compethard + drainage:competsoft +
-                    # texture:compethard + texture:competsoft +
-                    (sizeE + DC + Tannual + Pannual| ID_PET_MES / ID_ARB)
-
-
-  # form <- lBAI_CM ~ sizeE + DC + Tannual + Pannual + competRatio + texture + drainage + competTot +
-  #                   competRatio:DC + competRatio:Tannual + competRatio:Pannual +
-  #                   # competRatio:texture + competRatio:drainage +
+  # form <- lBAI_CM ~ sizeE + DC + Tannual + Pannual + compethard + competsoft + texture + drainage +
+  #                   compethard:DC + compethard:Tannual + compethard:Pannual +
+  #                   competsoft:DC + competsoft:Tannual + competsoft:Pannual +
   #                   # sizeE:DC + sizeE:Tannual + sizeE:Pannual +
-  #                   # competsoft:DC + competsoft:Tannual + competsoft:Pannual +
-  #                   # texture:DC + texture:Tannual + texture:Pannual +
-  #                   # drainage:DC + drainage:Tannual + drainage:Pannual +
+  #                   texture:DC + texture:Tannual + texture:Pannual +
+  #                   drainage:DC + drainage:Tannual + drainage:Pannual +
   #                   # drainage:compethard + drainage:competsoft +
   #                   # texture:compethard + texture:competsoft +
   #                   (sizeE + DC + Tannual + Pannual | ID_PET_MES / ID_ARB)
+
+
+  form <- lBAI_CM ~ sizeE + DC + DCp + Tannual + Pannual + competRatio + texture + drainage + competTot +
+                    competRatio:DC + competRatio:DCp + competRatio:Tannual + competRatio:Pannual +
+                    # competRatio:texture + competRatio:drainage +
+                    # sizeE:DC + sizeE:Tannual + sizeE:Pannual +
+                    # competsoft:DC + competsoft:Tannual + competsoft:Pannual +
+                    # texture:DC + texture:DCp + texture:Tannual + texture:Pannual +
+                    # drainage:DC + drainage:DCp + drainage:Tannual + drainage:Pannual +
+                    # drainage:compethard + drainage:competsoft +
+                    # texture:compethard + texture:competsoft +
+                    (sizeE + DC + DCp | ID_PET_MES / ID_ARB)
 
   # if (sp == "SAB"){
   #   form <- lBAI_CM ~ texture + texture:drainage + mixE:BAtot_CM2HA + sizeE:DC + sizeE:DCp + compethard:DC + competsoft:DC + competsoft:DCp + mixE:DCp + sizeE:texture + compethard:texture + competsoft:texture + DC:texture + DCp:texture + Tannual:texture + Pannual:texture + sizeE:drainage + compethard:drainage + competsoft:drainage + DC:drainage + DCp:drainage + Tannual:drainage + Pannual:drainage + (sizeE + DC + DCp |ID_PET_MES / ID_ARB)

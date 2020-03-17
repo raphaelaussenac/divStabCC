@@ -154,6 +154,15 @@ dot <- function(data = data, sp = sp, inter = "del"){
   par$param[par$param == "drainage2"] <- "D2"
   par$param[par$param == "texture2"] <- "T2"
   par$param[par$param == "sizeE"] <- "DBH"
+  par$param[par$param == "competRatio"] <- "R"
+  par$param[par$param == "Tp:competRatio"] <- "Tp.R"
+  par$param[par$param == "Tannual:competRatio"] <- "Tan.R"
+  par$param[par$param == "Pp:competRatio"] <- "Pp.R"
+  par$param[par$param == "Pannual:competRatio"] <- "Pan.R"
+  par$param[par$param == "DC:competRatio"] <- "DC.R"
+  par$param[par$param == "DCp:competRatio"] <- "DCp.R"
+  par$param[par$param == "competTot"] <- "I"
+
 
 
   # # avant les deux points
@@ -257,7 +266,7 @@ dot(data = modPET, sp = "PET", inter = "del")
 dot(data = modSAB, sp = "SAB", inter = "keep")
 dot(data = modPET, sp = "PET", inter = "keep")
 
-# quartz.save("~/Desktop/dotchart.png", type = "png", width = 8, height = 9, device = dev.cur())
+quartz.save("~/Desktop/dotchart.png", type = "png", width = 8, height = 9, device = dev.cur())
 
 # ####################################################
 # ## plot CI
@@ -298,13 +307,8 @@ theme_set(theme_sjplot())
 
 
 
-plot_model(modPET, type = "pred", terms = c("DC", "compethard"))
 
-
-
-plot_model(modPET, type = "pred", terms = c("DC", "drainage", "compethard"))
-
-plot_model(modSAB, type = "int")
+plot_model(modPET, type = "pred", terms = c('Tannual', 'competRatio'))
 
 
 #
