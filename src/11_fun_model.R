@@ -212,6 +212,21 @@ prepare_mod_data_futur <- function(data = data, sp=sp){
   meas$DC <- meas$DCMAXjun_jul_aug
 
   ####################################################
+  ## competition ratio and total
+  ####################################################
+
+  if (sp=="PET"){
+    meas$competRatio <- meas$competsoft / (meas$compethard + meas$competsoft)
+    meas[is.na(meas$competRatio), 'competRatio'] <- 0
+
+  } else if (sp=="SAB"){
+    meas$competRatio <- meas$compethard / (meas$competsoft + meas$compethard)
+    meas[is.na(meas$competRatio), 'competRatio'] <- 0
+  }
+
+  meas$competTot <- meas$competsoft + meas$compethard
+
+  ####################################################
   ## Scaling variables using distribution in the present
   ####################################################
   # load unscaled parameters
@@ -239,6 +254,9 @@ prepare_mod_data_futur <- function(data = data, sp=sp){
   meas$Pannual <- (meas$Pannual - mean(meas_scale$Pannual)) / sd(meas_scale$Pannual)
   meas$DC <- (meas$DC - mean(meas_scale$DC)) / sd(meas_scale$DC)
   meas$DCp <- (meas$DCp - mean(meas_scale$DCp)) / sd(meas_scale$DCp)
+  meas$competRatio <- (meas$competRatio - mean(meas_scale$competRatio)) / sd(meas_scale$competRatio)
+  meas$competTot <- (meas$competTot - mean(meas_scale$competTot)) / sd(meas_scale$competTot)
+
   return(meas)
 }
 
