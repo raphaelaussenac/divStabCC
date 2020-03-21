@@ -123,16 +123,16 @@ dot <- function(data = data, sp = sp, inter = "del"){
   par <- par[order(par$mean),]
 
   # Change variable name
-  par$param[par$param == "(Intercept)"] <- "int.       "
+  par$param[par$param == "(Intercept)"] <- "intercept"
   par$param[par$param == "competsoft"] <- "Cs"
   par$param[par$param == "competsoft:drainage2"] <- "Cs.D2"
   par$param[par$param == "compethard"] <- "Ch"
   par$param[par$param == "compethard:texture3"] <- "Ch.T3"
   par$param[par$param == "DC:texture3"] <- "DC.T3"
   par$param[par$param == "DC:texture2"] <- "DC.T2"
-  par$param[par$param == "Pannual:drainage2"] <- "Pan.D2"
+  par$param[par$param == "Pannual:drainage2"] <- "P.D2"
   par$param[par$param == "DC:competsoft"] <- "DC.Cs"
-  par$param[par$param == "Tannual"] <- "Tan"
+  par$param[par$param == "Tannual"] <- "T"
   par$param[par$param == "Tannual:competsoft"] <- "Tan.Cs"
   par$param[par$param == "Tannual:drainage2"] <- "Tan.D2"
   par$param[par$param == "DC:compethard"] <- "DC.Ch"
@@ -140,28 +140,29 @@ dot <- function(data = data, sp = sp, inter = "del"){
   par$param[par$param == "Tannual:compethard"] <- "Tan.Ch"
   par$param[par$param == "DC:drainage2"] <- "DC.D2"
   par$param[par$param == "Tannual:texture3"] <- "Tan.T3"
-  par$param[par$param == "Pannual:compethard"] <- "Pan.Ch"
-  par$param[par$param == "Pannual:competsoft"] <- "Pan.Cs"
-  par$param[par$param == "Pannual"] <- "Pan"
-  par$param[par$param == "Pannual:texture3"] <- "Pan.T3"
-  par$param[par$param == "Pannual:texture2"] <- "Pan.T2"
-  par$param[par$param == "Tannual:texture2"] <- "Tan.T2"
-  par$param[par$param == "texture3"] <- "T3"
+  par$param[par$param == "Pannual:compethard"] <- "P.Ch"
+  par$param[par$param == "Pannual:competsoft"] <- "P.Cs"
+  par$param[par$param == "Pannual"] <- "P"
+  par$param[par$param == "Pannual:texture3"] <- "P.T3"
+  par$param[par$param == "Pannual:texture2"] <- "P.T2"
+  par$param[par$param == "Tannual:texture2"] <- "T.T2"
+  par$param[par$param == "texture3"] <- "Tex3"
   par$param[par$param == "compethard:texture2"] <- "Ch.T2"
-  par$param[par$param == "DC"] <- "DC"
+  par$param[par$param == "DC"] <- "DCy"
+  par$param[par$param == "DCp"] <- "DCy-1"
   par$param[par$param == "competsoft:texture2"] <- "Cs.T2"
   par$param[par$param == "compethard:drainage2"] <- "Ch.D2"
-  par$param[par$param == "drainage2"] <- "D2"
-  par$param[par$param == "texture2"] <- "T2"
+  par$param[par$param == "drainage2"] <- "Dr2"
+  par$param[par$param == "texture2"] <- "Tex2"
   par$param[par$param == "sizeE"] <- "DBH"
   par$param[par$param == "competRatio"] <- "R"
   par$param[par$param == "Tp:competRatio"] <- "Tp.R"
-  par$param[par$param == "Tannual:competRatio"] <- "Tan.R"
+  par$param[par$param == "Tannual:competRatio"] <- "T.R"
   par$param[par$param == "Pp:competRatio"] <- "Pp.R"
-  par$param[par$param == "Pannual:competRatio"] <- "Pan.R"
-  par$param[par$param == "DC:competRatio"] <- "DC.R"
-  par$param[par$param == "DCp:competRatio"] <- "DCp.R"
-  par$param[par$param == "competTot"] <- "I"
+  par$param[par$param == "Pannual:competRatio"] <- "P.R"
+  par$param[par$param == "DC:competRatio"] <- "DCy.R"
+  par$param[par$param == "DCp:competRatio"] <- "DCy-1.R"
+  par$param[par$param == "competTot"] <- "BAn"
 
 
 
@@ -308,7 +309,7 @@ theme_set(theme_sjplot())
 
 
 
-plot_model(modPET, type = "pred", terms = c('Tannual', 'competRatio'))
+plot_model(modSAB, type = "pred", terms = c('competTot', 'competRatio'))
 
 
 #
