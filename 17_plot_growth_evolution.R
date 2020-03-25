@@ -43,7 +43,7 @@ geom_ribbon(aes(x=yr, ymax=BAImax, ymin=BAImin, fill = rcp), alpha = 0.2)+
 geom_ribbon(aes(x=yr, ymax=CImax, ymin=CImin, fill = rcp), alpha = 0.5)+
 xlab("year")+
 ylab("total BAI")+
-facet_wrap(~ a, nrow = 1, scales="free_y")+
+facet_wrap(~ a, nrow = 1, scales="fixe")+
 theme_bw()+
 theme(strip.background = element_rect(colour = "white", fill = "white"), legend.position = "bottom", legend.title = element_blank())
 # ggsave (paste("~/Desktop/sp", ".pdf", sep = ""), width = 8, height= 5)

@@ -32,8 +32,8 @@ new <- function(data = data){
   data$prop_PET_BA <- data$prop_PET_BA
   data$prop_SAB_BA <- data$prop_SAB_BA
   data$BAtot_CM2HA <- data$BAtot_CM2HA
-  data$texture <- as.factor(3) # 1, 2, 3 ou data$texture = 0
-  data$drainage <- as.factor(1) # 1, 2, ou data$drainage = 0
+  data$texture <- as.factor(data$texture) # 1, 2, 3 ou data$texture = 0
+  data$drainage <- as.factor(data$drainage) # 1, 2, ou data$drainage = 0
   data$compethard <- data$compethard
   data$competsoft <- data$competsoft
   return(data)
@@ -89,7 +89,7 @@ pred_mod <- function(s = c("SAB", "PET")){
   }
   predictions <- predictions[-1, ]
 
-  save(predictions, file = paste(getwd(), "/modelOutput/", "QC_BAI_", s, "_T3D1", ".rdata", sep = "")) # change name according to T and D
+  save(predictions, file = paste(getwd(), "/modelOutput/", "QC_BAI_", s, "_T0D0", ".rdata", sep = "")) # change name according to T and D
 
 }
 

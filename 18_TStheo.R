@@ -30,6 +30,7 @@ TStheo <- function(PET = PET, SAB = SAB, soil = soil){
   data$period <- "p"
   data[data$yr >= 1986 & data$yr <= 2005, "period"] <- "p1"
   data[data$yr >= 2081 & data$yr <= 2100, "period"] <- "p2"
+  data <- data[data$period != 'p',]
 
   ####################################################
   # Define variable classes & name
@@ -47,7 +48,7 @@ TStheo <- function(PET = PET, SAB = SAB, soil = soil){
   data$mod <- as.factor(data$mod)
   data$rcpmod <- as.factor(data$rcpmod)
   data$mix <- factor(data$mix, levels = c("MIX", "PET", "SAB"),ordered = FALSE)
-  data$period <- factor(data$period, levels = c("p1", "p2", "p"), ordered = FALSE)
+  data$period <- factor(data$period, levels = c("p1", "p2"), ordered = FALSE)
 
   ####################################################
   # Tests TS(PET + SAB) = TS(MIX)
@@ -83,9 +84,9 @@ TStheo <- function(PET = PET, SAB = SAB, soil = soil){
 
   TS <- function(period = "p1", rcpmod = "rcp45_ACCES", psab = 0.5, ppet = 0.5, sim = "V1"){
 
-    p <- stand[stand$rcpmod == rcpmod & stand$period == period & sim == sim,]
-    po <- PET[PET$rcpmod == rcpmod & PET$period == period & sim == sim,]
-    ab <- SAB[SAB$rcpmod == rcpmod & SAB$period == period & sim == sim,]
+    p <- stand[stand$rcpmod == rcpmod & stand$period == period & stand$sim == sim,]
+    po <- PET[PET$rcpmod == rcpmod & PET$period == period & PET$sim == sim,]
+    ab <- SAB[SAB$rcpmod == rcpmod & SAB$period == period & SAB$sim == sim,]
 
     # ponderation par abondance ds le ppt mixte et par le nombre de placettes utilisées
     psabmix <- (psab/nb_plot_mix)
@@ -100,13 +101,15 @@ TStheo <- function(PET = PET, SAB = SAB, soil = soil){
     # var mix théorique (déduite des mix)
     varpetmix <- (ppetmix^2 * var(po[po$mix == "MIX", "BAI"]))
     varsabmix <- (psabmix^2 * var(ab[ab$mix == "MIX", "BAI"]))
-    covmix <- (2 * ppetmix * psabmix * cov(po[po$mix == "MIX", "BAI"], ab[ab$mix == "MIX", "BAI"]))
+    covarmix <- cov(po[po$mix == "MIX", "BAI"], ab[ab$mix == "MIX", "BAI"])
+    covmix <- (2 * ppetmix * psabmix * covarmix)
     varmixtheomix <- varpetmix + varsabmix + covmix
 
     # var mix théorique (déduite des mono)
     varpetmono <- (ppet^2 * var(po[po$mix == "PET", "BAI"]))
     varsabmono <- (psab^2 * var(ab[ab$mix == "SAB", "BAI"]))
-    covmono <- (2 * ppet * psab * cov(po[po$mix == "PET", "BAI"], ab[ab$mix == "SAB", "BAI"]))
+    covarmono <- cov(po[po$mix == "PET", "BAI"], ab[ab$mix == "SAB", "BAI"])
+    covmono <- (2 * ppet * psab * covarmono)
     varmixtheomono <- varpetmono + varsabmono + covmono
 
 
@@ -134,21 +137,34 @@ TStheo <- function(PET = PET, SAB = SAB, soil = soil){
     TSmixtheomono <- meanmixtheomono / varmixtheomono
 
 
-    a <- data.frame(period = period, rcpmod = rcpmod, varmixobs = varmixobs, varmixtheomix = varmixtheomix, varmixtheomono = varmixtheomono, meanmixobs = meanmixobs, meanmixtheomix = meanmixtheomix, meanmixtheomono = meanmixtheomono, TSmixobs = TSmixobs, TSmixtheomix = TSmixtheomix, TSmixtheomono = TSmixtheomono, sim = sim, varpetmix, varsabmix, covmix, varpetmono, varsabmono, covmono, meanpetmix, meansabmix, meanpetmono, meansabmono )
+    a <- data.frame(period = period, rcpmod = rcpmod, varmixobs = varmixobs,
+                    varmixtheomix = varmixtheomix, varmixtheomono = varmixtheomono,
+                    meanmixobs = meanmixobs, meanmixtheomix = meanmixtheomix,
+                    meanmixtheomono = meanmixtheomono, TSmixobs = TSmixobs,
+                    TSmixtheomix = TSmixtheomix, TSmixtheomono = TSmixtheomono,
+                    sim = sim, varpetmix, varsabmix, covmix, varpetmono,
+                    varsabmono, covmono, meanpetmix, meansabmix, meanpetmono,
+                    meansabmono, covarmix, covarmono)
 
     return(a)
   }
 
 
   # test function
-  a <- TS(period = "p1", rcpmod = "rcp45_ACCES", psab = 0.5, ppet = 0.5, sim = "V1")
+  # a <- TS(period = "p1", rcpmod = "rcp45_ACCES", psab = 0.5, ppet = 0.5, sim = "V1")
 
   # combinations of proportions
   prop <- data.frame(ppet = seq(0,1, 0.01))
   prop$psab <- 1 - prop$ppet
 
 
-  b <- data.frame(psab = NA, ppet = NA, period = NA, rcpmod = NA, varmixobs = NA, varmixtheomix = NA, varmixtheomono = NA, meanmixobs = NA, meanmixtheomix = NA, meanmixtheomono = NA, TSmixobs = NA, TSmixtheomix = NA, TSmixtheomono = NA, sim = NA, varpetmix = NA, varsabmix = NA, covmix = NA, varpetmono = NA, varsabmono = NA, covmono = NA, meanpetmix = NA, meansabmix = NA, meanpetmono = NA, meansabmono = NA)
+  b <- data.frame(psab = NA, ppet = NA, period = NA, rcpmod = NA, varmixobs = NA,
+                  varmixtheomix = NA, varmixtheomono = NA, meanmixobs = NA,
+                  meanmixtheomix = NA, meanmixtheomono = NA, TSmixobs = NA,
+                  TSmixtheomix = NA, TSmixtheomono = NA, sim = NA, varpetmix = NA,
+                  varsabmix = NA, covmix = NA, varpetmono = NA, varsabmono = NA,
+                  covmono = NA, meanpetmix = NA, meansabmix = NA, meanpetmono = NA,
+                  meansabmono = NA, covarmix = NA, covarmono = NA)
   for (i in c("p1", "p2")){
     for (j in unique(data$rcpmod)){
       for (l in unique(data$sim)){
@@ -209,23 +225,26 @@ TStheo <- function(PET = PET, SAB = SAB, soil = soil){
     } else if (component == "cov"){
       b$componentmix <- b$covmix
       b$componentmono <- b$covmono
+    } else if (component == "covar"){
+      b$componentmix <- b$covarmix
+      b$componentmono <- b$covarmono
     }
 
     if (mixmono == "mix"){
       compomin <- ddply(b[b$period == period, ], .(psab, rcp), summarise, compomin = min(componentmix))
       compomax <- ddply(b[b$period == period, ], .(psab, rcp), summarise, compomax = max(componentmix))
-      # CImin <- ddply(b[b$period == period, ], .(psab, rcp), summarise, CImin = wilcox.test(componentmix, conf.int=TRUE)$conf.int[1])
-      # CImax <- ddply(b[b$period == period, ], .(psab, rcp), summarise, CImax = wilcox.test(componentmix, conf.int=TRUE)$conf.int[2])
-      compomix <- cbind(compomin, compomax[,"compomax"])#, CImin[,"CImin"], CImax[,"CImax"])
-      colnames(compomix) <- c("psab", "rcp", paste(component, "min", sep = ""), paste(component, "max", sep = ""))#, "CImin", "CImax")
+      CImin <- ddply(b[b$period == period, ], .(psab, rcp), summarise, CImin = wilcox.test(componentmix, conf.int=TRUE)$conf.int[1])
+      CImax <- ddply(b[b$period == period, ], .(psab, rcp), summarise, CImax = wilcox.test(componentmix, conf.int=TRUE)$conf.int[2])
+      compomix <- cbind(compomin, compomax[,"compomax"], CImin[,"CImin"], CImax[,"CImax"])
+      colnames(compomix) <- c("psab", "rcp", paste(component, "min", sep = ""), paste(component, "max", sep = ""), "CImin", "CImax")
       a <- compomix
     } else if (mixmono == "mono"){
       compomin <- ddply(b[b$period == period, ], .(psab, rcp), summarise, compomin = min(componentmono))
       compomax <- ddply(b[b$period == period, ], .(psab, rcp), summarise, compomax = max(componentmono))
-      # CImin <- ddply(b[b$period == period, ], .(psab, rcp), summarise, CImin = wilcox.test(componentmono, conf.int=TRUE)$conf.int[1])
-      # CImax <- ddply(b[b$period == period, ], .(psab, rcp), summarise, CImax = wilcox.test(componentmono, conf.int=TRUE)$conf.int[2])
-      compomono <- cbind(compomin, compomax[,"compomax"])#, CImin[,"CImin"], CImax[,"CImax"])
-      colnames(compomono) <- c("psab", "rcp", paste(component, "min", sep = ""), paste(component, "max", sep = ""))#, "CImin", "CImax")
+      CImin <- ddply(b[b$period == period, ], .(psab, rcp), summarise, CImin = wilcox.test(componentmono, conf.int=TRUE)$conf.int[1])
+      CImax <- ddply(b[b$period == period, ], .(psab, rcp), summarise, CImax = wilcox.test(componentmono, conf.int=TRUE)$conf.int[2])
+      compomono <- cbind(compomin, compomax[,"compomax"], CImin[,"CImin"], CImax[,"CImax"])
+      colnames(compomono) <- c("psab", "rcp", paste(component, "min", sep = ""), paste(component, "max", sep = ""), "CImin", "CImax")
       a <- compomono
     }
     return(a)
@@ -276,7 +295,7 @@ TStheo <- function(PET = PET, SAB = SAB, soil = soil){
   }
 
   # pour toutes les variables
-  for (i in c("TS", "mean", "variance")){ #, "meanpet", "varpet", "meansab", "varsab", "cov")){
+  for (i in c("TS", "mean", "variance", "meanpet", "meansab", "varpet", "varsab", "cov", "covar")){
     plotTS(component = i)
   }
 

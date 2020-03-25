@@ -21,11 +21,12 @@ if (Sys.info()["sysname"] == "Darwin"){
 # TS, mean, var plot QC
 ####################################################
 
-for (i in c("mean", "variance", "TS")){
+for (i in c("TS", "mean", "variance", "meanpet", "meansab", "varpet", "varsab", "cov", "covar")){
   load(paste(i, "theoT0D0.rdata", sep = ""))
 
   ggplot()+
-  geom_ribbon(data = p, aes(x = psab, ymax = Ymax, ymin = Ymin, fill = RCP), alpha = 0.5)+
+  geom_ribbon(data = p, aes(x = psab, ymax = Ymax, ymin = Ymin, fill = RCP), alpha = 0.2)+
+  geom_ribbon(data = p, aes(x = psab, ymax = CImax, ymin = CImin, fill = RCP), alpha = 0.5)+
   facet_wrap(~ plotp, nrow = 1)+
   theme_bw()+
   xlim(0,1)+
@@ -33,7 +34,7 @@ for (i in c("mean", "variance", "TS")){
   xlab("proportion of fir")+
   ylab("") #component)
 
-  # ggsave(paste("~/Desktop/", i, "theoT0D0.pdf", sep = ""), width = 8, height = 5)
+  ggsave(paste("~/Desktop/", i, "theoT0D0.pdf", sep = ""), width = 8, height = 5)
 
 }
 
