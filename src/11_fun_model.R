@@ -260,7 +260,97 @@ prepare_mod_data_futur <- function(data = data, sp=sp){
   return(meas)
 }
 
+prepare_mod_data_futur_barycentre <- function(data = data, sp=sp, div = div, meanCompetTot = meanCompetTot){
+  ####################################################
+  ## Packages
+  ####################################################
+  library("lme4")
 
+  ####################################################
+  ## Data
+  ####################################################
+  meas <- data
+  meas$ID_PET_MES <- as.factor(meas$ID_PET_MES)
+  meas$ID_ARB <- as.factor(meas$ID_ARB)
+
+  ####################################################
+  ## Select Species
+  ####################################################
+  sp <- sp   # SAB or PET
+  sizefun <- "DBH"    # weibull / logN / DBH
+  mixturreE <- "prop"     # beta / prop
+
+  if (sp == "SAB"){
+    meas <- meas[meas$ESSENCE=="SAB",]
+  } else if (sp == "PET"){
+    meas <- meas[meas$ESSENCE=="PET",]
+  }
+
+  ####################################################
+  ## Size effect
+  ####################################################
+  if (sizefun == "logN" ){
+    meas$sizeE <- exp((-1/2)*(( log(meas$DHP_CM/DBHopt) )/DBHb)^2)
+  } else if (sizefun == "weibull" ){
+    meas$sizeE <- ((meas$DHP_CM/DBHopt)^(DBHb-1))  *   exp(-(meas$DHP_CM/DBHopt)^DBHb)
+  } else if (sizefun == "DBH"){
+    meas$sizeE <- meas$DHP_CM
+  }
+
+  ####################################################
+  ## Mixture effect
+  ####################################################
+  if (sp == "SAB"){
+    if (mixturreE == "beta"){
+      meas$mixE <- (meas$prop_SAB_BA^(C-1)) * ((1-meas$prop_SAB_BA)^(D-1))
+    } else if (mixturreE == "prop"){
+      meas$mixE <- meas$prop_SAB_BA
+    }
+  } else if (sp == "PET"){
+    if (mixturreE == "beta"){
+      meas$mixE <- (meas$prop_PET_BA^(C-1)) * ((1-meas$prop_PET_BA)^(D-1))
+    } else if (mixturreE == "prop"){
+      meas$mixE <- meas$prop_PET_BA
+    }
+  }
+
+  ####################################################
+  ## DC
+  ####################################################
+  # meas$DC <- meas$DCMAXmay_jun_jul
+  meas$DC <- meas$DCMAXjun_jul_aug
+
+  ####################################################
+  ## competition ratio and total
+  ####################################################
+
+  meas$competRatio <- div
+  meas$competTot <- meanCompetTot
+
+  ####################################################
+  ## Scaling variables using distribution in the present
+  ####################################################
+  # load unscaled parameters
+  if (sp=="PET"){
+    load("./data/meas_PET.rdata")
+  } else if (sp=="SAB"){
+    load("./data/meas_SAB.rdata")
+  }
+
+  meas$sizeE <- (meas$sizeE - mean(meas_scale$sizeE)) / sd(meas_scale$sizeE)
+  meas$mixE <- (meas$mixE - mean(meas_scale$mixE)) / sd(meas_scale$mixE)
+  meas$BAtot_CM2HA <- (meas$BAtot_CM2HA - mean(meas_scale$BAtot_CM2HA)) / sd(meas_scale$BAtot_CM2HA)
+  meas$compethard <- (meas$compethard - mean(meas_scale$compethard)) / sd(meas_scale$compethard)
+  meas$competsoft <- (meas$competsoft - mean(meas_scale$competsoft)) / sd(meas_scale$competsoft)
+  meas$Tannual <- (meas$Tannual - mean(meas_scale$Tannual)) / sd(meas_scale$Tannual)
+  meas$Pannual <- (meas$Pannual - mean(meas_scale$Pannual)) / sd(meas_scale$Pannual)
+  meas$DC <- (meas$DC - mean(meas_scale$DC)) / sd(meas_scale$DC)
+  meas$DCp <- (meas$DCp - mean(meas_scale$DCp)) / sd(meas_scale$DCp)
+  meas$competRatio <- (meas$competRatio - mean(meas_scale$competRatio)) / sd(meas_scale$competRatio)
+  meas$competTot <- (meas$competTot - mean(meas_scale$competTot)) / sd(meas_scale$competTot)
+
+  return(meas)
+}
 
 
 run_mod <- function(speed=c("rapid", "lent")){
