@@ -50,10 +50,10 @@ pred_mod <- function(s = c("SAB", "PET")){
   }
 
   # predictions
-  nsim <- 20
+  nsim <- 100
   predictions <- data.frame()
   for (i in fileNames){
-    for (d in c(0, 0.5, 1)){ # levels of diversity
+    for (d in seq(0,1, 0.01)){ # levels of diversity
       load(i)
       # set variables to defined value
       data$plotyr <- NULL
@@ -79,10 +79,14 @@ pred_mod <- function(s = c("SAB", "PET")){
                 'compethard', 'competsoft',
                 'DCMAXjun_jul_aug', 'mixE')] <- NULL
 
-      # pred <- predict(mod, re.form = NA, newdata = newdata)
-      pred <- predictInterval(mod, newdata = newdata, which = "fixed", level = 0.95, n.sims = nsim, stat = "median", include.resid.var = FALSE, returnSims = TRUE)
-      pred <- as.data.frame(attr(pred, "sim.results"))
-      colnames(pred) <- paste('V', colnames(pred), sep = '')
+      # pred <- predictInterval
+      # pred <- predictInterval(mod, newdata = newdata, which = "fixed", level = 0.95, n.sims = nsim, stat = "median", include.resid.var = FALSE, returnSims = TRUE)
+      # pred <- as.data.frame(attr(pred, "sim.results"))
+      # colnames(pred) <- paste('V', colnames(pred), sep = '')
+
+      # predictions with predict
+      pred <- data.frame('V1' = predict(mod, newdata = newdata, re.form = NA))
+
       pred$yr <- newdata$yr
       rm(newdata) # free up memory
       # back transforming predictions: exp(log(BAI+1))

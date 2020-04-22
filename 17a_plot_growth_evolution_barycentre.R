@@ -25,6 +25,15 @@ df <- rbind(df, predictions)
 # calculate envelopes
 ################################################################################
 
+
+
+
+
+-----> la suite seulement pour div = 0 | 1? sinon trop long avec toutes les combinaisons
+
+
+
+
 # wide to long
 df <- melt(df, id.vars = c("sp", "rcp", "mod", "div", "yr"), measure.vars = colnames(df)[substr(colnames(df), 1, 1) == 'V'])
 
