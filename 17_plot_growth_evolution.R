@@ -23,15 +23,17 @@ if (Sys.info()["sysname"] == "Darwin"){
 ####################################################
 load("chronoplotT0D0.rdata")
 
+chronoplot <- chronoplot[chronoplot$plot != "all",]
+
 ggplot(data = chronoplot)+
 geom_ribbon(aes(x=yr, ymax=BAImax, ymin=BAImin, fill = rcp), alpha = 0.2)+
 geom_ribbon(aes(x=yr, ymax=CImax, ymin=CImin, fill = rcp), alpha = 0.5)+
 xlab("year")+
-ylab("total BAI")+
-facet_wrap(~ plot, nrow = 1, scales="free_y",  labeller = as_labeller(c("all" = "a) all stands", "MIX" = "b) mixed stands", "PET" = "c) pure aspen stands", "SAB" = "d) pure fir stands")))+
+ylab("total BAI (cm2)")+
+facet_wrap(~ plot, nrow = 1, scales = "free",  labeller = as_labeller(c("MIX" = "a) mixed stands", "PET" = "b) pure aspen stands", "SAB" = "c) pure fir stands"))) + # "all" = "a) all stands",
 theme_bw()+
 theme(strip.background = element_rect(colour = "white", fill = "white"), legend.position = "bottom", legend.title = element_blank())
-# ggsave (paste("~/Desktop/plot", ".pdf", sep = ""), width = 8, height= 5)
+ggsave (paste("~/Desktop/chronoPlot", ".pdf", sep = ""), width = 8, height= 5)
 
 ####################################################
 # plot sp
@@ -42,11 +44,11 @@ ggplot(data = chronosp)+
 geom_ribbon(aes(x=yr, ymax=BAImax, ymin=BAImin, fill = rcp), alpha = 0.2)+
 geom_ribbon(aes(x=yr, ymax=CImax, ymin=CImin, fill = rcp), alpha = 0.5)+
 xlab("year")+
-ylab("total BAI")+
-facet_wrap(~ a, nrow = 1, scales="fixe")+
+ylab("total BAI (cm2)")+
+facet_wrap(~ a, nrow = 1, scales = "free")+
 theme_bw()+
 theme(strip.background = element_rect(colour = "white", fill = "white"), legend.position = "bottom", legend.title = element_blank())
-# ggsave (paste("~/Desktop/sp", ".pdf", sep = ""), width = 8, height= 5)
+ggsave (paste("~/Desktop/chronoSp", ".pdf", sep = ""), width = 8, height= 5)
 
 ####################################################
 # All plots
@@ -103,19 +105,19 @@ theme(strip.background = element_rect(colour = "white", fill = "white"), legend.
 multidiff <- Sys.glob("diffsp*")
 
 load(multidiff[1])
-diff1 <- diff
-for (i in 2:length(multidiff)){
-  load(multidiff[i])
-  diff1 <- rbind(diff1, diff)
-}
+# diff1 <- diff
+# for (i in 2:length(multidiff)){
+#   load(multidiff[i])
+#   diff1 <- rbind(diff1, diff)
+# }
 
 # plot
-ggplot(data = diff1[diff1$soil != "T0D0",])+
+ggplot(data = diff[diff$soil == "T0D0",])+
 geom_ribbon(aes(x=yr, ymax=BAImax, ymin=BAImin, fill = rcp), alpha = 0.2)+
 geom_ribbon(aes(x=yr, ymax=CImax, ymin=CImin, fill = rcp), alpha = 0.5)+
 xlab("year")+
 ylab("total BAI")+
-facet_grid(soil ~ plot, scales = "free")+
+facet_wrap(~ plot, scales = "free")+
 theme_bw()+
 theme(strip.background = element_rect(colour = "white", fill = "white"), legend.position = "bottom", legend.title = element_blank())
 # ggsave ("~/Desktop/chap3/plot/diffsp.pdf", width = 8, height= 15)

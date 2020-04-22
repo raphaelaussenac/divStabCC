@@ -6,6 +6,8 @@ rm(list=ls(all=TRUE))
 ####################################################
 # Packages
 library(ggplot2)
+library(plyr) # pour la fonction "ddply"
+
 
 # Choose the work directory = folder
 if (Sys.info()["sysname"] == "Darwin"){
@@ -16,6 +18,9 @@ if (Sys.info()["sysname"] == "Darwin"){
   setwd(mainBasePath)
 }
 
+# load barycentre id
+load('~/Documents/GitHub/divStabCC/data/barycentre.rdata')
+
 ####################################################
 ## extract climate values
 ####################################################
@@ -25,7 +30,7 @@ listTemp <- Sys.glob("*.rdata")
 df <- data.frame()
 for (i in listTemp){
   load(i)
-  clim <- data[, c('yr', 'Tannual', 'Pannual', 'DCMAXjun_jul_aug')]
+  clim <- data[, c('ID_PET_MES', 'yr', 'Tannual', 'Pannual', 'DCMAXjun_jul_aug')]
   clim$rcp <- substr(i, 1, 5)
   clim$model <- substr(i, 7, 11)
   df <- rbind(df, clim)
@@ -36,81 +41,175 @@ for (i in listTemp){
 ####################################################
 
 df$period <- NA
-df[df$yr <= 1971, "period"] <- "1952-1971"
+# df[df$yr <= 1971, "period"] <- "1952-1971"
 df[df$yr >= 1986 & df$yr <= 2005, "period"] <- "1986-2005"
 df[df$yr >= 2081 & df$yr <= 2100, "period"] <- "2081-2100"
 df <- df[!is.na(df$period), ]
+
+####################################################
+## climate at barycentre
+####################################################
+
+bary <- ddply(df[df$ID_PET_MES == id, ], .(rcp, period), summarise, Tmean = mean(Tannual), Pmean = mean(Pannual), DCmean = mean(DCMAXjun_jul_aug))
 
 
 ####################################################
 ## plot
 ####################################################
 
+# choose colors for rcp
+cbPalette <- c("cadetblue3", "gold2")
+
 df <- df[df$yr > 1975,]
 
 ggplot() +
-  geom_density(data = df, aes(Tannual, linetype = period, col = rcp), size = 1, alpha = 0.2) +
+  geom_histogram(data = df, aes(Tannual, col = rcp, fill = rcp), alpha = 0.2, position = 'dodge') +
+  geom_vline(data = bary, aes(xintercept = Tmean, col = rcp, linetype = rcp), size = 0.7) +
+  scale_color_manual(values=cbPalette) +
+  scale_fill_manual(values=cbPalette) +
+  facet_wrap( ~ period, scales = 'fixed') +
   theme_bw() +
-  xlab("T") +
-  theme(legend.position="bottom", legend.title=element_blank())
-
-ggplot() +
-  geom_density(data = df, aes(Pannual, linetype = period, col = rcp), size = 1, alpha = 0.2) +
-  theme_bw() +
-  xlab("P") +
-  theme(legend.position="bottom", legend.title=element_blank())
-
-ggplot() +
-  geom_density(data = df, aes(DCMAXjun_jul_aug, linetype = period, col = rcp), size = 1, alpha = 0.2) +
-  theme_bw() +
-  xlab("DC") +
-  theme(legend.position="bottom", legend.title=element_blank())
-
+  xlab("annual temperature") +
+  # theme(legend.position="bottom", legend.title=element_blank())
+  theme(panel.grid.minor = element_blank(),
+        # panel.grid.major = element_blank(),
+        strip.background = element_blank(),
+        strip.text = element_text(colour = 'black'),
+        legend.position = "bottom",
+        legend.title=element_blank(),
+        panel.spacing = unit(20, 'pt'))
 #
+
+ggplot() +
+  geom_histogram(data = df, aes(Pannual, col = rcp, fill = rcp), alpha = 0.2, position = 'dodge') +
+  geom_vline(data = bary, aes(xintercept = Pmean, col = rcp, linetype = rcp), size = 0.7) +
+  scale_color_manual(values=cbPalette) +
+  scale_fill_manual(values=cbPalette) +
+  facet_wrap( ~ period, scales = 'fixed') +
+  theme_bw() +
+  xlab("annual precipitation") +
+  # theme(legend.position="bottom", legend.title=element_blank())
+  theme(panel.grid.minor = element_blank(),
+        # panel.grid.major = element_blank(),
+        strip.background = element_blank(),
+        strip.text = element_text(colour = 'black'),
+        legend.position = "bottom",
+        legend.title=element_blank(),
+        panel.spacing = unit(20, 'pt'))
+#
+
+ggplot() +
+  geom_histogram(data = df, aes(DCMAXjun_jul_aug, col = rcp, fill = rcp), alpha = 0.2, position = 'dodge') +
+  geom_vline(data = bary, aes(xintercept = DCmean, col = rcp, linetype = rcp), size = 0.7) +
+  scale_color_manual(values=cbPalette) +
+  scale_fill_manual(values=cbPalette) +
+  facet_wrap( ~ period, scales = 'fixed') +
+  theme_bw() +
+  xlab("summer DC") +
+  # theme(legend.position="bottom", legend.title=element_blank())
+  theme(panel.grid.minor = element_blank(),
+        # panel.grid.major = element_blank(),
+        strip.background = element_blank(),
+        strip.text = element_text(colour = 'black'),
+        legend.position = "bottom",
+        legend.title=element_blank(),
+        panel.spacing = unit(20, 'pt'))
+#
+
+
 # ggplot(data = df, aes(x = Tannual, y = Pannual)) +
 #    # geom_point()
 #    geom_density_2d()
 
 ####################################################
-## mean
+## climate evolution QC
 ####################################################
 
-# temperature
-mean(df[df$rcp == 'rcp45' & df$period == '1986-2005','Tannual'])
-mean(df[df$rcp == 'rcp85' & df$period == '1986-2005','Tannual'])
-mean(df[df$rcp == 'rcp45' & df$period == '2081-2100','Tannual'])
-mean(df[df$rcp == 'rcp85' & df$period == '2081-2100','Tannual'])
+climEvolQC <- ddply(df, .(rcp, period), summarise, Tmean = mean(Tannual),
+                                                   Pmean = mean(Pannual),
+                                                   DCmean = mean(DCMAXjun_jul_aug),
+                                                   Tvar = var(Tannual),
+                                                   Pvar = var(Pannual),
+                                                   DCvar = var(DCMAXjun_jul_aug))
+# diff
+diff45 <- climEvolQC[climEvolQC$rcp == 'rcp45', 3:ncol(climEvolQC)]
+diff45[3,] <- diff45[2,] - diff45[1,]
+diff45
 
-# precipitation
-mean(df[df$rcp == 'rcp45' & df$period == '1986-2005','Pannual'])
-mean(df[df$rcp == 'rcp85' & df$period == '1986-2005','Pannual'])
-mean(df[df$rcp == 'rcp45' & df$period == '2081-2100','Pannual'])
-mean(df[df$rcp == 'rcp85' & df$period == '2081-2100','Pannual'])
+diff85 <- climEvolQC[climEvolQC$rcp == 'rcp85', 3:ncol(climEvolQC)]
+diff85[3,] <- diff85[2,] - diff85[1,]
+diff85
 
-# drought
-mean(df[df$rcp == 'rcp45' & df$period == '1986-2005','DCMAXjun_jul_aug'])
-mean(df[df$rcp == 'rcp85' & df$period == '1986-2005','DCMAXjun_jul_aug'])
-mean(df[df$rcp == 'rcp45' & df$period == '2081-2100','DCMAXjun_jul_aug'])
-mean(df[df$rcp == 'rcp85' & df$period == '2081-2100','DCMAXjun_jul_aug'])
 
 ####################################################
-## variance
+## climate evolution at barycentre
 ####################################################
 
-# temperature
-var(df[df$rcp == 'rcp45' & df$period == '1986-2005','Tannual'])
-var(df[df$rcp == 'rcp85' & df$period == '1986-2005','Tannual'])
-var(df[df$rcp == 'rcp45' & df$period == '2081-2100','Tannual'])
-var(df[df$rcp == 'rcp85' & df$period == '2081-2100','Tannual'])
+climEvolQC <- ddply(df[df$ID_PET_MES == id, ], .(rcp, period), summarise, Tmean = mean(Tannual),
+                                                   Pmean = mean(Pannual),
+                                                   DCmean = mean(DCMAXjun_jul_aug),
+                                                   Tvar = var(Tannual),
+                                                   Pvar = var(Pannual),
+                                                   DCvar = var(DCMAXjun_jul_aug))
+# diff
+diff45 <- climEvolQC[climEvolQC$rcp == 'rcp45', 3:ncol(climEvolQC)]
+diff45[3,] <- diff45[2,] - diff45[1,]
+diff45
 
-# precipitation
-var(df[df$rcp == 'rcp45' & df$period == '1986-2005','Pannual'])
-var(df[df$rcp == 'rcp85' & df$period == '1986-2005','Pannual'])
-var(df[df$rcp == 'rcp45' & df$period == '2081-2100','Pannual'])
-var(df[df$rcp == 'rcp85' & df$period == '2081-2100','Pannual'])
+diff85 <- climEvolQC[climEvolQC$rcp == 'rcp85', 3:ncol(climEvolQC)]
+diff85[3,] <- diff85[2,] - diff85[1,]
+diff85
 
-# drought
-var(df[df$rcp == 'rcp45' & df$period == '1986-2005','DCMAXjun_jul_aug'])
-var(df[df$rcp == 'rcp85' & df$period == '1986-2005','DCMAXjun_jul_aug'])
-var(df[df$rcp == 'rcp45' & df$period == '2081-2100','DCMAXjun_jul_aug'])
-var(df[df$rcp == 'rcp85' & df$period == '2081-2100','DCMAXjun_jul_aug'])
+# same plot but fot bary only (df[df$ID_PET_MES == id, ] instead of df)
+ggplot() +
+  geom_histogram(data = df[df$ID_PET_MES == id, ], aes(Tannual, col = rcp, fill = rcp), alpha = 0.2, position = 'dodge') +
+  geom_vline(data = bary, aes(xintercept = Tmean, col = rcp, linetype = rcp), size = 0.7) +
+  scale_color_manual(values=cbPalette) +
+  scale_fill_manual(values=cbPalette) +
+  facet_wrap( ~ period, scales = 'fixed') +
+  theme_bw() +
+  xlab("annual temperature") +
+  # theme(legend.position="bottom", legend.title=element_blank())
+  theme(panel.grid.minor = element_blank(),
+        # panel.grid.major = element_blank(),
+        strip.background = element_blank(),
+        strip.text = element_text(colour = 'black'),
+        legend.position = "bottom",
+        legend.title=element_blank(),
+        panel.spacing = unit(20, 'pt'))
+#
+
+ggplot() +
+  geom_histogram(data = df[df$ID_PET_MES == id, ], aes(Pannual, col = rcp, fill = rcp), alpha = 0.2, position = 'dodge') +
+  geom_vline(data = bary, aes(xintercept = Pmean, col = rcp, linetype = rcp), size = 0.7) +
+  scale_color_manual(values=cbPalette) +
+  scale_fill_manual(values=cbPalette) +
+  facet_wrap( ~ period, scales = 'fixed') +
+  theme_bw() +
+  xlab("annual precipitation") +
+  # theme(legend.position="bottom", legend.title=element_blank())
+  theme(panel.grid.minor = element_blank(),
+        # panel.grid.major = element_blank(),
+        strip.background = element_blank(),
+        strip.text = element_text(colour = 'black'),
+        legend.position = "bottom",
+        legend.title=element_blank(),
+        panel.spacing = unit(20, 'pt'))
+#
+
+ggplot() +
+  geom_histogram(data = df[df$ID_PET_MES == id, ], aes(DCMAXjun_jul_aug, col = rcp, fill = rcp), alpha = 0.2, position = 'dodge') +
+  geom_vline(data = bary, aes(xintercept = DCmean, col = rcp, linetype = rcp), size = 0.7) +
+  scale_color_manual(values=cbPalette) +
+  scale_fill_manual(values=cbPalette) +
+  facet_wrap( ~ period, scales = 'fixed') +
+  theme_bw() +
+  xlab("summer DC") +
+  # theme(legend.position="bottom", legend.title=element_blank())
+  theme(panel.grid.minor = element_blank(),
+        # panel.grid.major = element_blank(),
+        strip.background = element_blank(),
+        strip.text = element_text(colour = 'black'),
+        legend.position = "bottom",
+        legend.title=element_blank(),
+        panel.spacing = unit(20, 'pt'))

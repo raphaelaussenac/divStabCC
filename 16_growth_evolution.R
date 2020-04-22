@@ -176,3 +176,18 @@ for (i in 1:length(PETs)){
   soil <- substr(PETs[i], 12, 15)
   allinone(PET = PET, SAB = SAB, soil = soil)
 }
+
+
+####################################################
+# Data
+####################################################
+
+countTree <- vector()
+for (i in unique(SAB$ID_PET_MES)){
+  countTree <- c(countTree, length(unique(SAB[SAB$ID_PET_MES== i, 'ID_ARB'])))
+}
+
+sum(countTree==1)
+sum(countTree==2)
+sum(countTree==3)
+sum(countTree==7)

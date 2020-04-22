@@ -150,10 +150,6 @@ diffMix$diffGrowth <- ((diffMix$standMeanGrowth * 100) / diffMix$standMeanGrowth
 ## calculate envelopes
 ####################################################
 
-# TODO:
-# - diagramme soustraction entre courbe overyielding et diagonale (prod attendues des espèces en mélange)
-# l'idée c'est de pouvoir dire un mélange de 10% de peuplier donne un overyielding de +5% de croissance actuel ou 15% en 2100
-
 # choose colors for rcp
 cbPalette <- c("cadetblue3", "gold2")
 
@@ -252,15 +248,6 @@ theme(panel.grid.minor = element_blank(),
       legend.position = "bottom",
       legend.title=element_blank(),
       panel.spacing = unit(20, 'pt'))
-
-
-
-
-
-
-
-
-
 
 
 
