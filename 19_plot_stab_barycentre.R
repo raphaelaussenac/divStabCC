@@ -88,6 +88,19 @@ for (propSAB in seq(0, 1, 0.01)){
 
 pure <- rbind(purePET, pureSAB)
 
+# define periods
+pure$period <- 'p'
+pure[pure$yr <= 2005 & pure$yr > 1985, 'period'] <- '1986-2005'
+pure[pure$yr <= 2100 & pure$yr > 2080, 'period'] <- '2081-2100'
+
+# calculate sp growth cov
+pureVarCov <- pure[, c('sp', 'rcp', 'mod', 'propSAB', 'yr', 'period', 'Growth')]
+pureVarCov <- dcast(pureVarCov, rcp + mod + propSAB + yr  + period ~ sp)
+pureVarCov <- ddply(pureVarCov, .(rcp, mod, propSAB, period), summarise, COV = cov(PET, SAB),
+                                                               PETvar = sd(PET),
+                                                               SABvar = sd(SAB))
+#
+
 # calculate stand total growth
 pure <- ddply(pure, .(rcp, mod, propSAB, yr), summarise, standGrowth = sum(Growth))
 
@@ -105,6 +118,18 @@ pureDf$stab <- pureDf$standMeanGrowth / pureDf$standVar
 ####################################################
 ## calculate stand total growth from tree growth in mixture
 ####################################################
+
+# define periods
+df$period <- 'p'
+df[df$yr <= 2005 & df$yr > 1985, 'period'] <- '1986-2005'
+df[df$yr <= 2100 & df$yr > 2080, 'period'] <- '2081-2100'
+
+# calculate sp growth cov
+growthVarCov <- df[, c('sp', 'rcp', 'mod', 'propSAB', 'yr', 'period', 'Growth')]
+growthVarCov <- dcast(growthVarCov, rcp + mod + propSAB + yr  + period ~ sp)
+growthVarCov <- ddply(growthVarCov, .(rcp, mod, propSAB, period), summarise, COV = cov(PET, SAB),
+                                                               PETvar = sd(PET),
+                                                               SABvar = sd(SAB))
 
 # calculate stand total growth
 df <- ddply(df, .(rcp, mod, propSAB, yr), summarise, standGrowth = sum(Growth))
@@ -130,12 +155,22 @@ diffMean <-  dcast(standMean, rcp + mod + propSAB ~ period)
 diffMean$diffMean <- ((diffMean[, '2081-2100'] * 100) / diffMean[, '1986-2005']) - 100
 # var
 diffVar <-  dcast(standVar, rcp + mod + propSAB ~ period)
-diffVar$diffVar <- diffVar[, '2081-2100'] - diffVar[, '1986-2005']
+diffVar$diffVar <- ((diffVar[, '2081-2100'] * 100) / diffVar[, '1986-2005']) - 100
 # TS
 diffTS <-  dcast(standDf, rcp + mod + propSAB ~ period)
-diffTS$diffTS <- diffTS[, '2081-2100'] - diffTS[, '1986-2005']
+diffTS$diffTS <- ((diffTS[, '2081-2100'] * 100) / diffTS[, '1986-2005']) - 100
 
-# diffDf <- cbind(diffMean, 'diffVar' = diffVar[, 'diffVar'], 'diffTS' = diffTS[, 'diffTS'])
+# cov
+diffCOV <-  dcast(growthVarCov[, c('rcp', 'mod', 'propSAB', 'period', 'COV')], rcp + mod + propSAB ~ period)
+diffCOV$diffCOV <- ((diffCOV[, '2081-2100'] * 100) / diffCOV[, '1986-2005']) - 100
+
+# PETvar
+diffPET <-  dcast(growthVarCov[, c('rcp', 'mod', 'propSAB', 'period', 'PETvar')], rcp + mod + propSAB ~ period)
+diffPET$diffPET <- ((diffPET[, '2081-2100'] * 100) / diffPET[, '1986-2005']) - 100
+
+# SABvar
+diffSAB <-  dcast(growthVarCov[, c('rcp', 'mod', 'propSAB', 'period', 'SABvar')], rcp + mod + propSAB ~ period)
+diffSAB$diffSAB <- ((diffSAB[, '2081-2100'] * 100) / diffSAB[, '1986-2005']) - 100
 
 ####################################################
 ## calculate differences between pure and mixed
@@ -145,9 +180,16 @@ pureTemp<- pureDf
 colnames(pureTemp) <- paste(colnames(pureTemp), 'pure', sep ='')
 diffMix <- cbind(pureTemp, standDf)
 diffMix$diffGrowth <- ((diffMix$standMeanGrowth * 100) / diffMix$standMeanGrowthpure ) - 100
+diffMix$diffVar <- ((diffMix$standVar * 100) / diffMix$standVarpure ) - 100
 
-####################################################
-## calculate envelopes
+colnames(pureVarCov) <- paste(colnames(pureVarCov), 'pure', sep = '')
+covVarMix <- cbind(pureVarCov, growthVarCov)
+covVarMix$covdiff <- ((covVarMix$COV * 100) / covVarMix$COVpure ) - 100
+covVarMix$PETvardiff <- ((covVarMix$PETvar * 100) / covVarMix$PETvarpure ) - 100
+covVarMix$SABvardiff <- ((covVarMix$SABvar * 100) / covVarMix$SABvarpure ) - 100
+
+########################################################################################################
+## Plot Mean
 ####################################################
 
 # choose colors for rcp
@@ -185,9 +227,7 @@ theme(panel.grid.minor = element_blank(),
 ggsave ("~/Desktop/overyielding.pdf", width = 8, height= 5)
 
 
-
 # plot expected mean from pure stands ------------------------------------------------------------------------------------
-
 # min, max and CI for each RCP
 df_min <- ddply(pureDf, .(rcp, propSAB, period), summarise, min = min(standMeanGrowth))
 df_max <- ddply(pureDf, .(rcp, propSAB, period), summarise, max = max(standMeanGrowth))
@@ -219,8 +259,7 @@ theme(panel.grid.minor = element_blank(),
       panel.spacing = unit(20, 'pt'))
 #
 
-# plot diff between growth in pure vs mixed stands ------------------------------------------------------------------------------------
-
+# plot diff mean growth in pure vs mixed stands ------------------------------------------------------------------------------------
 # min, max and CI for each RCP
 df_min <- ddply(diffMix, .(rcp, propSAB, period), summarise, min = min(diffGrowth))
 df_max <- ddply(diffMix, .(rcp, propSAB, period), summarise, max = max(diffGrowth))
@@ -248,8 +287,40 @@ theme(panel.grid.minor = element_blank(),
       legend.position = "bottom",
       legend.title=element_blank(),
       panel.spacing = unit(20, 'pt'))
+#
+# plot mean growth diff 2000 / 2100------------------------------------------------------------------------------------
+# min, max and CI for each RCP
+df_min <- ddply(diffMean, .(rcp, propSAB), summarise, min = min(diffMean))
+df_max <- ddply(diffMean, .(rcp, propSAB), summarise, max = max(diffMean))
+df_CImin <- ddply(diffMean, .(rcp, propSAB), summarise, CImin = quantile(diffMean,0.375))
+df_CImax <- ddply(diffMean, .(rcp, propSAB), summarise, CImax = quantile(diffMean,0.625))
+dfMed <- ddply(diffMean, .(rcp, propSAB), summarise, med = median(diffMean))
+dfDiffMean <- cbind(df_min, 'max' = df_max$max, 'CImin' = df_CImin$CImin, 'CImax' = df_CImax$CImax, 'med' = dfMed$med)
 
+ggplot(data = dfDiffMean) +
+geom_ribbon(aes(x = propSAB, ymax = max, ymin = min, fill = rcp), alpha = 0.1) +
+# geom_ribbon(aes(x = propSAB, ymax = CImax, ymin = CImin, fill = rcp), alpha = 0.6) +
+geom_line(aes(x = propSAB, y = med, col = rcp), size = 1) +
+geom_hline(yintercept = 0, linetype = "dashed", color = "black", size = 0.5) +
+scale_fill_manual(values=cbPalette) +
+scale_color_manual(values=cbPalette) +
+scale_x_continuous(breaks=seq(0, 1, by = 0.1), expand = c(0, 0)) +
+scale_y_continuous(breaks=seq(-30, 10, by = 5)) +
+xlab('proportion of fir')+
+ylab('expected difference in BAI (%)') +
+theme_light() +
+theme(panel.grid.minor = element_blank(),
+      panel.grid.major = element_blank(),
+      strip.background = element_blank(),
+      strip.text = element_text(colour = 'black'),
+      legend.position = "bottom",
+      legend.title=element_blank(),
+      panel.spacing = unit(20, 'pt'))
+#
 
+########################################################################################################
+## Plot stand Variance
+####################################################
 
 # plot Var ------------------------------------------------------------------------------------
 # min, max and CI for each RCP
@@ -265,6 +336,7 @@ geom_ribbon(aes(x = propSAB, ymax = max, ymin = min, fill = rcp), alpha = 0.1) +
 # geom_ribbon(aes(x = propSAB, ymax = CImax, ymin = CImin, fill = rcp), alpha = 0.6) +
 geom_line(aes(x = propSAB, y = med, col = rcp), size = 1) +
 scale_fill_manual(values=cbPalette) +
+scale_color_manual(values=cbPalette) +
 facet_grid( ~ period) +
 scale_x_continuous(breaks=seq(0, 1, by = 0.1), expand = c(0, 0)) +
 xlab('proportion of fir')+
@@ -277,7 +349,340 @@ theme(panel.grid.minor = element_blank(),
       legend.position = "bottom",
       legend.title=element_blank(),
       panel.spacing = unit(20, 'pt'))
+#
 
+# plot diff var growth in pure vs mixed stands ------------------------------------------------------------------------------------
+# min, max and CI for each RCP
+df_min <- ddply(diffMix, .(rcp, propSAB, period), summarise, min = min(diffVar))
+df_max <- ddply(diffMix, .(rcp, propSAB, period), summarise, max = max(diffVar))
+df_CImin <- ddply(diffMix, .(rcp, propSAB, period), summarise, CImin = quantile(diffVar,0.375))
+df_CImax <- ddply(diffMix, .(rcp, propSAB, period), summarise, CImax = quantile(diffVar,0.625))
+dfMed <- ddply(diffMix, .(rcp, propSAB, period), summarise, med = median(diffVar))
+dfDiffVar <- cbind(df_min, 'max' = df_max$max, 'CImin' = df_CImin$CImin, 'CImax' = df_CImax$CImax, 'med' = dfMed$med)
+
+ggplot(data = dfDiffVar) +
+geom_ribbon(aes(x = propSAB, ymax = max, ymin = min, fill = rcp), alpha = 0.2) +
+# geom_ribbon(aes(x = propSAB, ymax = CImax, ymin = CImin, fill = rcp), alpha = 0.6) +
+geom_line(aes(x = propSAB, y = med, col = rcp), size = 1) +
+scale_color_manual(values=cbPalette) +
+scale_fill_manual(values=cbPalette) +
+facet_grid( ~ period) +
+# scale_x_continuous(breaks=seq(0, 1, by = 0.1), expand = c(0, 0)) +
+# scale_y_continuous(breaks=seq(0, 30, by = 2.5)) +
+xlab('proportion of fir')+
+ylab('difference of BAI (cm2) between pure and mixed stands') +
+theme_light() +
+theme(panel.grid.minor = element_blank(),
+      panel.grid.major = element_blank(),
+      strip.background = element_blank(),
+      strip.text = element_text(colour = 'black'),
+      legend.position = "bottom",
+      legend.title=element_blank(),
+      panel.spacing = unit(20, 'pt'))
+#
+# diff variance between 200-2100
+# min, max and CI for each RCP ------------------------------------------------------------------------------------
+df_min <- ddply(diffVar, .(rcp, propSAB), summarise, min = min(diffVar))
+df_max <- ddply(diffVar, .(rcp, propSAB), summarise, max = max(diffVar))
+df_CImin <- ddply(diffVar, .(rcp, propSAB), summarise, CImin = quantile(diffVar,0.375))
+df_CImax <- ddply(diffVar, .(rcp, propSAB), summarise, CImax = quantile(diffVar,0.625))
+dfMed <- ddply(diffVar, .(rcp, propSAB), summarise, med = median(diffVar))
+dfDiffVar <- cbind(df_min, 'max' = df_max$max, 'CImin' = df_CImin$CImin, 'CImax' = df_CImax$CImax, 'med' = dfMed$med)
+
+ggplot(data = dfDiffVar) +
+geom_ribbon(aes(x = propSAB, ymax = max, ymin = min, fill = rcp), alpha = 0.1) +
+# geom_ribbon(aes(x = propSAB, ymax = CImax, ymin = CImin, fill = rcp), alpha = 0.6) +
+geom_line(aes(x = propSAB, y = med, col = rcp), size = 1) +
+scale_fill_manual(values=cbPalette) +
+scale_color_manual(values=cbPalette) +
+geom_hline(yintercept = 0, linetype = "dashed", color = "red", size = 2) +
+scale_x_continuous(breaks=seq(0, 1, by = 0.1), expand = c(0, 0)) +
+xlab('proportion of fir')+
+ylab('expected difference in the variance of BAI (%)') +
+theme_light() +
+theme(panel.grid.minor = element_blank(),
+      panel.grid.major = element_blank(),
+      strip.background = element_blank(),
+      strip.text = element_text(colour = 'black'),
+      legend.position = "bottom",
+      legend.title=element_blank(),
+      panel.spacing = unit(20, 'pt'))
+#
+########################################################################################################
+## Plot sp cov
+####################################################
+
+# plot cov
+# min, max and CI for each RCP ------------------------------------------------------------------------------------
+df_min <- ddply(growthVarCov, .(rcp, propSAB, period), summarise, min = min(COV))
+df_max <- ddply(growthVarCov, .(rcp, propSAB, period), summarise, max = max(COV))
+df_CImin <- ddply(growthVarCov, .(rcp, propSAB, period), summarise, CImin = quantile(COV,0.375))
+df_CImax <- ddply(growthVarCov, .(rcp, propSAB, period), summarise, CImax = quantile(COV,0.625))
+dfMed <- ddply(growthVarCov, .(rcp, propSAB, period), summarise, med = median(COV))
+dfCov <- cbind(df_min, 'max' = df_max$max, 'CImin' = df_CImin$CImin, 'CImax' = df_CImax$CImax, 'med' = dfMed$med)
+
+ggplot(data = dfCov) +
+geom_ribbon(aes(x = propSAB, ymax = max, ymin = min, fill = rcp), alpha = 0.1) +
+# geom_ribbon(aes(x = propSAB, ymax = CImax, ymin = CImin, fill = rcp), alpha = 0.6) +
+geom_line(aes(x = propSAB, y = med, col = rcp), size = 1) +
+scale_fill_manual(values=cbPalette) +
+geom_hline(yintercept = 0, linetype = "dashed", color = "red", size = 2) +
+scale_x_continuous(breaks=seq(0, 1, by = 0.1), expand = c(0, 0)) +
+facet_grid( ~ period) +
+xlab('proportion of fir')+
+ylab('expected difference in the variance of BAI (cm2)') +
+theme_light() +
+theme(panel.grid.minor = element_blank(),
+      panel.grid.major = element_blank(),
+      strip.background = element_blank(),
+      strip.text = element_text(colour = 'black'),
+      legend.position = "bottom",
+      legend.title=element_blank(),
+      panel.spacing = unit(20, 'pt'))
+#
+
+# plot diff cov pure and mixed
+# min, max and CI for each RCP ------------------------------------------------------------------------------------
+df_min <- ddply(covVarMix, .(rcp, propSAB, period), summarise, min = min(covdiff))
+df_max <- ddply(covVarMix, .(rcp, propSAB, period), summarise, max = max(covdiff))
+df_CImin <- ddply(covVarMix, .(rcp, propSAB, period), summarise, CImin = quantile(covdiff,0.375))
+df_CImax <- ddply(covVarMix, .(rcp, propSAB, period), summarise, CImax = quantile(covdiff,0.625))
+dfMed <- ddply(covVarMix, .(rcp, propSAB, period), summarise, med = median(covdiff))
+dfCovdiff <- cbind(df_min, 'max' = df_max$max, 'CImin' = df_CImin$CImin, 'CImax' = df_CImax$CImax, 'med' = dfMed$med)
+
+ggplot(data = dfCovdiff) +
+geom_ribbon(aes(x = propSAB, ymax = max, ymin = min, fill = rcp), alpha = 0.1) +
+# geom_ribbon(aes(x = propSAB, ymax = CImax, ymin = CImin, fill = rcp), alpha = 0.6) +
+geom_line(aes(x = propSAB, y = med, col = rcp), size = 1) +
+scale_fill_manual(values=cbPalette) +
+geom_hline(yintercept = 0, linetype = "dashed", color = "red", size = 2) +
+scale_x_continuous(breaks=seq(0, 1, by = 0.1), expand = c(0, 0)) +
+facet_grid( ~ period) +
+xlab('proportion of fir')+
+ylab('expected difference in the variance of BAI (cm2)') +
+theme_light() +
+theme(panel.grid.minor = element_blank(),
+      panel.grid.major = element_blank(),
+      strip.background = element_blank(),
+      strip.text = element_text(colour = 'black'),
+      legend.position = "bottom",
+      legend.title=element_blank(),
+      panel.spacing = unit(20, 'pt'))
+#
+# plot diff cov 2000 / 2100
+# min, max and CI for each RCP ------------------------------------------------------------------------------------
+df_min <- ddply(diffCOV, .(rcp, propSAB), summarise, min = min(diffCOV))
+df_max <- ddply(diffCOV, .(rcp, propSAB), summarise, max = max(diffCOV))
+df_CImin <- ddply(diffCOV, .(rcp, propSAB), summarise, CImin = quantile(diffCOV,0.375))
+df_CImax <- ddply(diffCOV, .(rcp, propSAB), summarise, CImax = quantile(diffCOV,0.625))
+dfMed <- ddply(diffCOV, .(rcp, propSAB), summarise, med = median(diffCOV))
+dfCovdiff <- cbind(df_min, 'max' = df_max$max, 'CImin' = df_CImin$CImin, 'CImax' = df_CImax$CImax, 'med' = dfMed$med)
+
+ggplot(data = dfCovdiff) +
+geom_ribbon(aes(x = propSAB, ymax = max, ymin = min, fill = rcp), alpha = 0.1) +
+# geom_ribbon(aes(x = propSAB, ymax = CImax, ymin = CImin, fill = rcp), alpha = 0.6) +
+geom_line(aes(x = propSAB, y = med, col = rcp), size = 1) +
+scale_fill_manual(values=cbPalette) +
+geom_hline(yintercept = 0, linetype = "dashed", color = "red", size = 2) +
+scale_x_continuous(breaks=seq(0, 1, by = 0.1), expand = c(0, 0)) +
+xlab('proportion of fir')+
+ylab('expected difference in the variance of BAI (cm2)') +
+theme_light() +
+theme(panel.grid.minor = element_blank(),
+      panel.grid.major = element_blank(),
+      strip.background = element_blank(),
+      strip.text = element_text(colour = 'black'),
+      legend.position = "bottom",
+      legend.title=element_blank(),
+      panel.spacing = unit(20, 'pt'))
+
+########################################################################################################
+## Plot PET var
+####################################################
+
+# plot varPET
+# min, max and CI for each RCP ------------------------------------------------------------------------------------
+df_min <- ddply(growthVarCov, .(rcp, propSAB, period), summarise, min = min(PETvar))
+df_max <- ddply(growthVarCov, .(rcp, propSAB, period), summarise, max = max(PETvar))
+df_CImin <- ddply(growthVarCov, .(rcp, propSAB, period), summarise, CImin = quantile(PETvar,0.375))
+df_CImax <- ddply(growthVarCov, .(rcp, propSAB, period), summarise, CImax = quantile(PETvar,0.625))
+dfMed <- ddply(growthVarCov, .(rcp, propSAB, period), summarise, med = median(PETvar))
+dfPETVar <- cbind(df_min, 'max' = df_max$max, 'CImin' = df_CImin$CImin, 'CImax' = df_CImax$CImax, 'med' = dfMed$med)
+
+ggplot(data = dfPETVar) +
+geom_ribbon(aes(x = propSAB, ymax = max, ymin = min, fill = rcp), alpha = 0.1) +
+# geom_ribbon(aes(x = propSAB, ymax = CImax, ymin = CImin, fill = rcp), alpha = 0.6) +
+geom_line(aes(x = propSAB, y = med, col = rcp), size = 1) +
+scale_fill_manual(values=cbPalette) +
+scale_color_manual(values=cbPalette) +
+geom_hline(yintercept = 0, linetype = "dashed", color = "red", size = 2) +
+scale_x_continuous(breaks=seq(0, 1, by = 0.1), expand = c(0, 0)) +
+facet_grid( ~ period) +
+xlab('proportion of fir')+
+ylab('expected difference in the variance of BAI (cm2)') +
+theme_light() +
+theme(panel.grid.minor = element_blank(),
+      panel.grid.major = element_blank(),
+      strip.background = element_blank(),
+      strip.text = element_text(colour = 'black'),
+      legend.position = "bottom",
+      legend.title=element_blank(),
+      panel.spacing = unit(20, 'pt'))
+#
+
+# plot diff PETvar pure and mixed
+# min, max and CI for each RCP ------------------------------------------------------------------------------------
+df_min <- ddply(covVarMix, .(rcp, propSAB, period), summarise, min = min(PETvardiff))
+df_max <- ddply(covVarMix, .(rcp, propSAB, period), summarise, max = max(PETvardiff))
+df_CImin <- ddply(covVarMix, .(rcp, propSAB, period), summarise, CImin = quantile(PETvardiff,0.375))
+df_CImax <- ddply(covVarMix, .(rcp, propSAB, period), summarise, CImax = quantile(PETvardiff,0.625))
+dfMed <- ddply(covVarMix, .(rcp, propSAB, period), summarise, med = median(PETvardiff))
+dfPETdiff <- cbind(df_min, 'max' = df_max$max, 'CImin' = df_CImin$CImin, 'CImax' = df_CImax$CImax, 'med' = dfMed$med)
+
+ggplot(data = dfPETdiff) +
+geom_ribbon(aes(x = propSAB, ymax = max, ymin = min, fill = rcp), alpha = 0.1) +
+# geom_ribbon(aes(x = propSAB, ymax = CImax, ymin = CImin, fill = rcp), alpha = 0.6) +
+geom_line(aes(x = propSAB, y = med, col = rcp), size = 1) +
+scale_fill_manual(values=cbPalette) +
+scale_color_manual(values=cbPalette) +
+geom_hline(yintercept = 0, linetype = "dashed", color = "red", size = 2) +
+scale_x_continuous(breaks=seq(0, 1, by = 0.1), expand = c(0, 0)) +
+facet_grid( ~ period) +
+xlab('proportion of fir')+
+ylab('expected difference in the variance of BAI (cm2)') +
+theme_light() +
+theme(panel.grid.minor = element_blank(),
+      panel.grid.major = element_blank(),
+      strip.background = element_blank(),
+      strip.text = element_text(colour = 'black'),
+      legend.position = "bottom",
+      legend.title=element_blank(),
+      panel.spacing = unit(20, 'pt'))
+#
+# plot diff PETvar 2000 / 2100
+# min, max and CI for each RCP ------------------------------------------------------------------------------------
+df_min <- ddply(diffPET, .(rcp, propSAB), summarise, min = min(diffPET))
+df_max <- ddply(diffPET, .(rcp, propSAB), summarise, max = max(diffPET))
+df_CImin <- ddply(diffPET, .(rcp, propSAB), summarise, CImin = quantile(diffPET,0.375))
+df_CImax <- ddply(diffPET, .(rcp, propSAB), summarise, CImax = quantile(diffPET,0.625))
+dfMed <- ddply(diffPET, .(rcp, propSAB), summarise, med = median(diffPET))
+dfPETdiff <- cbind(df_min, 'max' = df_max$max, 'CImin' = df_CImin$CImin, 'CImax' = df_CImax$CImax, 'med' = dfMed$med)
+
+ggplot(data = dfPETdiff) +
+geom_ribbon(aes(x = propSAB, ymax = max, ymin = min, fill = rcp), alpha = 0.1) +
+# geom_ribbon(aes(x = propSAB, ymax = CImax, ymin = CImin, fill = rcp), alpha = 0.6) +
+geom_line(aes(x = propSAB, y = med, col = rcp), size = 1) +
+scale_fill_manual(values=cbPalette) +
+scale_color_manual(values=cbPalette) +
+geom_hline(yintercept = 0, linetype = "dashed", color = "red", size = 2) +
+scale_x_continuous(breaks=seq(0, 1, by = 0.1), expand = c(0, 0)) +
+xlab('proportion of fir')+
+ylab('expected difference in the variance of BAI (cm2)') +
+theme_light() +
+theme(panel.grid.minor = element_blank(),
+      panel.grid.major = element_blank(),
+      strip.background = element_blank(),
+      strip.text = element_text(colour = 'black'),
+      legend.position = "bottom",
+      legend.title=element_blank(),
+      panel.spacing = unit(20, 'pt'))
+#
+
+########################################################################################################
+## Plot SAB var
+####################################################
+
+# min, max and CI for each RCP ------------------------------------------------------------------------------------
+df_min <- ddply(growthVarCov, .(rcp, propSAB, period), summarise, min = min(SABvar))
+df_max <- ddply(growthVarCov, .(rcp, propSAB, period), summarise, max = max(SABvar))
+df_CImin <- ddply(growthVarCov, .(rcp, propSAB, period), summarise, CImin = quantile(SABvar,0.375))
+df_CImax <- ddply(growthVarCov, .(rcp, propSAB, period), summarise, CImax = quantile(SABvar,0.625))
+dfMed <- ddply(growthVarCov, .(rcp, propSAB, period), summarise, med = median(SABvar))
+dfSABVar <- cbind(df_min, 'max' = df_max$max, 'CImin' = df_CImin$CImin, 'CImax' = df_CImax$CImax, 'med' = dfMed$med)
+
+ggplot(data = dfSABVar) +
+geom_ribbon(aes(x = propSAB, ymax = max, ymin = min, fill = rcp), alpha = 0.1) +
+# geom_ribbon(aes(x = propSAB, ymax = CImax, ymin = CImin, fill = rcp), alpha = 0.6) +
+geom_line(aes(x = propSAB, y = med, col = rcp), size = 1) +
+scale_fill_manual(values=cbPalette) +
+scale_color_manual(values=cbPalette) +
+geom_hline(yintercept = 0, linetype = "dashed", color = "red", size = 2) +
+scale_x_continuous(breaks=seq(0, 1, by = 0.1), expand = c(0, 0)) +
+facet_grid( ~ period) +
+xlab('proportion of fir')+
+ylab('expected difference in the variance of BAI (cm2)') +
+theme_light() +
+theme(panel.grid.minor = element_blank(),
+      panel.grid.major = element_blank(),
+      strip.background = element_blank(),
+      strip.text = element_text(colour = 'black'),
+      legend.position = "bottom",
+      legend.title=element_blank(),
+      panel.spacing = unit(20, 'pt'))
+#
+
+# plot diff SABvar pure and mixed
+# min, max and CI for each RCP ------------------------------------------------------------------------------------
+df_min <- ddply(covVarMix, .(rcp, propSAB, period), summarise, min = min(SABvardiff))
+df_max <- ddply(covVarMix, .(rcp, propSAB, period), summarise, max = max(SABvardiff))
+df_CImin <- ddply(covVarMix, .(rcp, propSAB, period), summarise, CImin = quantile(SABvardiff,0.375))
+df_CImax <- ddply(covVarMix, .(rcp, propSAB, period), summarise, CImax = quantile(SABvardiff,0.625))
+dfMed <- ddply(covVarMix, .(rcp, propSAB, period), summarise, med = median(SABvardiff))
+dfSABdiff <- cbind(df_min, 'max' = df_max$max, 'CImin' = df_CImin$CImin, 'CImax' = df_CImax$CImax, 'med' = dfMed$med)
+
+ggplot(data = dfSABdiff) +
+geom_ribbon(aes(x = propSAB, ymax = max, ymin = min, fill = rcp), alpha = 0.1) +
+# geom_ribbon(aes(x = propSAB, ymax = CImax, ymin = CImin, fill = rcp), alpha = 0.6) +
+geom_line(aes(x = propSAB, y = med, col = rcp), size = 1) +
+scale_fill_manual(values=cbPalette) +
+scale_color_manual(values=cbPalette) +
+geom_hline(yintercept = 0, linetype = "dashed", color = "red", size = 2) +
+scale_x_continuous(breaks=seq(0, 1, by = 0.1), expand = c(0, 0)) +
+facet_grid( ~ period) +
+xlab('proportion of fir')+
+ylab('expected difference in the variance of BAI (cm2)') +
+theme_light() +
+theme(panel.grid.minor = element_blank(),
+      panel.grid.major = element_blank(),
+      strip.background = element_blank(),
+      strip.text = element_text(colour = 'black'),
+      legend.position = "bottom",
+      legend.title=element_blank(),
+      panel.spacing = unit(20, 'pt'))
+#
+
+# plot diff SABvar 2000 / 2100
+# min, max and CI for each RCP ------------------------------------------------------------------------------------
+df_min <- ddply(diffSAB, .(rcp, propSAB), summarise, min = min(diffSAB))
+df_max <- ddply(diffSAB, .(rcp, propSAB), summarise, max = max(diffSAB))
+df_CImin <- ddply(diffSAB, .(rcp, propSAB), summarise, CImin = quantile(diffSAB,0.375))
+df_CImax <- ddply(diffSAB, .(rcp, propSAB), summarise, CImax = quantile(diffSAB,0.625))
+dfMed <- ddply(diffSAB, .(rcp, propSAB), summarise, med = median(diffSAB))
+dfSABdiff <- cbind(df_min, 'max' = df_max$max, 'CImin' = df_CImin$CImin, 'CImax' = df_CImax$CImax, 'med' = dfMed$med)
+
+ggplot(data = dfSABdiff) +
+geom_ribbon(aes(x = propSAB, ymax = max, ymin = min, fill = rcp), alpha = 0.1) +
+# geom_ribbon(aes(x = propSAB, ymax = CImax, ymin = CImin, fill = rcp), alpha = 0.6) +
+geom_line(aes(x = propSAB, y = med, col = rcp), size = 1) +
+scale_fill_manual(values=cbPalette) +
+scale_color_manual(values=cbPalette) +
+geom_hline(yintercept = 0, linetype = "dashed", color = "red", size = 2) +
+scale_x_continuous(breaks=seq(0, 1, by = 0.1), expand = c(0, 0)) +
+xlab('proportion of fir')+
+ylab('expected difference in the variance of BAI (cm2)') +
+theme_light() +
+theme(panel.grid.minor = element_blank(),
+      panel.grid.major = element_blank(),
+      strip.background = element_blank(),
+      strip.text = element_text(colour = 'black'),
+      legend.position = "bottom",
+      legend.title=element_blank(),
+      panel.spacing = unit(20, 'pt'))
+#
+
+####################################################
+## Plot TS
+####################################################
 
 # plot TS ------------------------------------------------------------------------------------
 # min, max and CI for each RCP
@@ -306,59 +711,7 @@ theme(panel.grid.minor = element_blank(),
       legend.title=element_blank(),
       panel.spacing = unit(20, 'pt'))
 
-# plot diff ------------------------------------------------------------------------------------
-# min, max and CI for each RCP
-df_min <- ddply(diffMean, .(rcp, propSAB), summarise, min = min(diffMean))
-df_max <- ddply(diffMean, .(rcp, propSAB), summarise, max = max(diffMean))
-df_CImin <- ddply(diffMean, .(rcp, propSAB), summarise, CImin = quantile(diffMean,0.375))
-df_CImax <- ddply(diffMean, .(rcp, propSAB), summarise, CImax = quantile(diffMean,0.625))
-dfMed <- ddply(diffMean, .(rcp, propSAB), summarise, med = median(diffMean))
-dfDiffMean <- cbind(df_min, 'max' = df_max$max, 'CImin' = df_CImin$CImin, 'CImax' = df_CImax$CImax, 'med' = dfMed$med)
 
-ggplot(data = dfDiffMean) +
-geom_ribbon(aes(x = propSAB, ymax = max, ymin = min, fill = rcp), alpha = 0.1) +
-# geom_ribbon(aes(x = propSAB, ymax = CImax, ymin = CImin, fill = rcp), alpha = 0.6) +
-geom_line(aes(x = propSAB, y = med, col = rcp), size = 1) +
-geom_hline(yintercept = 0, linetype = "dashed", color = "black", size = 0.5) +
-scale_fill_manual(values=cbPalette) +
-scale_x_continuous(breaks=seq(0, 1, by = 0.1), expand = c(0, 0)) +
-scale_y_continuous(breaks=seq(-30, 10, by = 5)) +
-xlab('proportion of fir')+
-ylab('expected difference in BAI (cm2)') +
-theme_light() +
-theme(panel.grid.minor = element_blank(),
-      panel.grid.major = element_blank(),
-      strip.background = element_blank(),
-      strip.text = element_text(colour = 'black'),
-      legend.position = "bottom",
-      legend.title=element_blank(),
-      panel.spacing = unit(20, 'pt'))
-
-# min, max and CI for each RCP ------------------------------------------------------------------------------------
-df_min <- ddply(diffVar, .(rcp, propSAB), summarise, min = min(diffVar))
-df_max <- ddply(diffVar, .(rcp, propSAB), summarise, max = max(diffVar))
-df_CImin <- ddply(diffVar, .(rcp, propSAB), summarise, CImin = quantile(diffVar,0.375))
-df_CImax <- ddply(diffVar, .(rcp, propSAB), summarise, CImax = quantile(diffVar,0.625))
-dfMed <- ddply(diffVar, .(rcp, propSAB), summarise, med = median(diffVar))
-dfDiffVar <- cbind(df_min, 'max' = df_max$max, 'CImin' = df_CImin$CImin, 'CImax' = df_CImax$CImax, 'med' = dfMed$med)
-
-ggplot(data = dfDiffVar) +
-geom_ribbon(aes(x = propSAB, ymax = max, ymin = min, fill = rcp), alpha = 0.1) +
-# geom_ribbon(aes(x = propSAB, ymax = CImax, ymin = CImin, fill = rcp), alpha = 0.6) +
-geom_line(aes(x = propSAB, y = med, col = rcp), size = 1) +
-scale_fill_manual(values=cbPalette) +
-geom_hline(yintercept = 0, linetype = "dashed", color = "red", size = 2) +
-scale_x_continuous(breaks=seq(0, 1, by = 0.1), expand = c(0, 0)) +
-xlab('proportion of fir')+
-ylab('expected difference in the variance of BAI (cm2)') +
-theme_light() +
-theme(panel.grid.minor = element_blank(),
-      panel.grid.major = element_blank(),
-      strip.background = element_blank(),
-      strip.text = element_text(colour = 'black'),
-      legend.position = "bottom",
-      legend.title=element_blank(),
-      panel.spacing = unit(20, 'pt'))
 
 # min, max and CI for each RCP ------------------------------------------------------------------------------------
 df_min <- ddply(diffTS, .(rcp, propSAB), summarise, min = min(diffTS))
@@ -386,11 +739,6 @@ theme(panel.grid.minor = element_blank(),
       legend.title=element_blank(),
       panel.spacing = unit(20, 'pt'))
 #
-
-
-
-
-
 
 
 ###############################################################################################
