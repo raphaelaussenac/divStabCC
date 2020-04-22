@@ -35,6 +35,12 @@ df$div <- round(df$div, 3)
 # wide to long
 df <- melt(df, id.vars = c('sp', 'rcp', 'mod', 'div', 'yr'), measure.vars = colnames(df)[substr(colnames(df), 1, 1) == 'V'])
 
+# define periods
+df$period <- 'p'
+df[df$yr <= 2005 & df$yr > 1985, 'period'] <- '1986-2005'
+df[df$yr <= 2100 & df$yr > 2080, 'period'] <- '2081-2100'
+df <- df[df$period != 'p',]
+
 # calculate tree mean growth
 df <- ddply(df, .(sp, rcp, mod, div, yr), summarise, treeGrowth = mean(value)) #useless with prediction from 'predict' function
 
@@ -53,6 +59,53 @@ df$Growth <- df$treeGrowth * df$multipliFactor
 df[df$sp == "SAB", 'div'] <- round(1 - df[df$sp == "SAB", 'div'], 3)
 colnames(df)[colnames(df) == 'div'] <- 'propSAB'
 
+####################################################
+## calculate the expected mixed stand growth from
+## sp (individuals) growth in pure stand
+####################################################
+
+purePET <- df[df$sp == 'PET' & df$propSAB == 0, ]
+pureSAB <- df[df$sp == 'SAB' & df$propSAB == 1, ]
+
+
+for (propSAB in seq(0, 1, 0.01)){
+
+  if(propSAB != 0){
+    tempPET <- purePET[purePET$propSAB == 0, ]
+    tempPET$propSAB <- propSAB
+    tempPET$Growth <- tempPET$Growth * (1 - propSAB)
+    purePET <- rbind(purePET, tempPET)
+  }
+
+  if(propSAB != 1){
+    tempSAB <- pureSAB[pureSAB$propSAB == 1, ]
+    tempSAB$propSAB <- propSAB
+    tempSAB$Growth <- tempSAB$Growth * propSAB
+    pureSAB <- rbind(pureSAB, tempSAB)
+  }
+
+}
+
+pure <- rbind(purePET, pureSAB)
+
+# calculate stand total growth
+pure <- ddply(pure, .(rcp, mod, propSAB, yr), summarise, standGrowth = sum(Growth))
+
+# calculate mean and var of stand growth
+pure$period <- 'p'
+pure[pure$yr <= 2005 & pure$yr > 1985, 'period'] <- '1986-2005'
+pure[pure$yr <= 2100 & pure$yr > 2080, 'period'] <- '2081-2100'
+
+pureMean <- ddply(pure, .(rcp, mod, propSAB, period), summarise, standMeanGrowth = mean(standGrowth))
+pureVar <- ddply(pure, .(rcp, mod, propSAB, period), summarise, standVar = sd(standGrowth))
+pureDf <- cbind(pureMean, 'standVar' = pureVar[, 'standVar'])
+pureDf$stab <- pureDf$standMeanGrowth / pureDf$standVar
+
+
+####################################################
+## calculate stand total growth from tree growth in mixture
+####################################################
+
 # calculate stand total growth
 df <- ddply(df, .(rcp, mod, propSAB, yr), summarise, standGrowth = sum(Growth))
 
@@ -60,13 +113,16 @@ df <- ddply(df, .(rcp, mod, propSAB, yr), summarise, standGrowth = sum(Growth))
 df$period <- 'p'
 df[df$yr <= 2005 & df$yr > 1985, 'period'] <- '1986-2005'
 df[df$yr <= 2100 & df$yr > 2080, 'period'] <- '2081-2100'
-df <- df[df$period != 'p',]
 
 # calculate mean and var of stand growth
 standMean <- ddply(df, .(rcp, mod, propSAB, period), summarise, standMeanGrowth = mean(standGrowth))
 standVar <- ddply(df, .(rcp, mod, propSAB, period), summarise, standVar = sd(standGrowth))
 standDf <- cbind(standMean, 'standVar' = standVar[, 'standVar'])
 standDf$stab <- standDf$standMeanGrowth / standDf$standVar
+
+####################################################
+## calculate differences between the 2 periods
+####################################################
 
 # calculate difference of mean, var and TS between the 2 periods
 # mean
@@ -81,19 +137,27 @@ diffTS$diffTS <- diffTS[, '2081-2100'] - diffTS[, '1986-2005']
 
 # diffDf <- cbind(diffMean, 'diffVar' = diffVar[, 'diffVar'], 'diffTS' = diffTS[, 'diffTS'])
 
+####################################################
+## calculate differences between pure and mixed
+####################################################
+
+pureTemp<- pureDf
+colnames(pureTemp) <- paste(colnames(pureTemp), 'pure', sep ='')
+diffMix <- cbind(pureTemp, standDf)
+diffMix$diffGrowth <- ((diffMix$standMeanGrowth * 100) / diffMix$standMeanGrowthpure ) - 100
 
 ####################################################
 ## calculate envelopes
 ####################################################
 
 # TODO:
-# - remplacer enveloppes internes par médiane
 # - diagramme soustraction entre courbe overyielding et diagonale (prod attendues des espèces en mélange)
+# l'idée c'est de pouvoir dire un mélange de 10% de peuplier donne un overyielding de +5% de croissance actuel ou 15% en 2100
 
 # choose colors for rcp
 cbPalette <- c("cadetblue3", "gold2")
 
-# plot Mean
+# plot Mean ------------------------------------------------------------------------------------
 # min, max and CI for each RCP
 df_min <- ddply(standDf, .(rcp, propSAB, period), summarise, min = min(standMeanGrowth))
 df_max <- ddply(standDf, .(rcp, propSAB, period), summarise, max = max(standMeanGrowth))
@@ -108,7 +172,7 @@ geom_ribbon(aes(x = propSAB, ymax = max, ymin = min, fill = rcp), alpha = 0.2) +
 geom_line(aes(x = propSAB, y = med, col = rcp), size = 1) +
 scale_color_manual(values=cbPalette) +
 scale_fill_manual(values=cbPalette) +
-# geom_smooth(data = subset(dfMean, period == "1986-2005"), aes(x = propSAB, y = CImax), method = lm, col = "black", linetype = "dashed", size = 0.5) +
+geom_smooth(data = subset(dfMean, period == "1986-2005"), aes(x = propSAB, y = CImax), method = lm, col = "black", linetype = "dashed", size = 0.5) +
 facet_grid( ~ period) +
 scale_x_continuous(breaks=seq(0, 1, by = 0.1), expand = c(0, 0)) +
 xlab('proportion of fir')+
@@ -125,7 +189,82 @@ theme(panel.grid.minor = element_blank(),
 ggsave ("~/Desktop/overyielding.pdf", width = 8, height= 5)
 
 
-# plot Var
+
+# plot expected mean from pure stands ------------------------------------------------------------------------------------
+
+# min, max and CI for each RCP
+df_min <- ddply(pureDf, .(rcp, propSAB, period), summarise, min = min(standMeanGrowth))
+df_max <- ddply(pureDf, .(rcp, propSAB, period), summarise, max = max(standMeanGrowth))
+df_CImin <- ddply(pureDf, .(rcp, propSAB, period), summarise, CImin = quantile(standMeanGrowth,0.375))
+df_CImax <- ddply(pureDf, .(rcp, propSAB, period), summarise, CImax = quantile(standMeanGrowth,0.625))
+dfMed <- ddply(pureDf, .(rcp, propSAB, period), summarise, med = median(standMeanGrowth))
+dfpureMean <- cbind(df_min, 'max' = df_max$max, 'CImin' = df_CImin$CImin, 'CImax' = df_CImax$CImax, 'med' = dfMed$med)
+
+ggplot() +
+geom_ribbon(data = dfMean, aes(x = propSAB, ymax = max, ymin = min, fill = rcp), alpha = 0.2) +
+geom_ribbon(data = dfpureMean, aes(x = propSAB, ymax = max, ymin = min, fill = rcp), alpha = 0.1) +
+# geom_ribbon(aes(x = propSAB, ymax = CImax, ymin = CImin, fill = rcp), alpha = 0.6) +
+geom_line(data = dfMean, aes(x = propSAB, y = med, col = rcp), size = 1) +
+geom_line(data = dfpureMean, aes(x = propSAB, y = med, col = rcp, linetype = rcp), size = 0.5, alpha = 0.8) +
+scale_color_manual(values=cbPalette) +
+scale_fill_manual(values=cbPalette) +
+# geom_smooth(data = subset(dfMean, period == "1986-2005"), aes(x = propSAB, y = CImax), method = lm, col = "black", linetype = "dashed", size = 0.5) +
+facet_grid( ~ period) +
+scale_x_continuous(breaks=seq(0, 1, by = 0.1), expand = c(0, 0)) +
+xlab('proportion of fir')+
+ylab('expected BAI (cm2)') +
+theme_light() +
+theme(panel.grid.minor = element_blank(),
+      panel.grid.major = element_blank(),
+      strip.background = element_blank(),
+      strip.text = element_text(colour = 'black'),
+      legend.position = "bottom",
+      legend.title=element_blank(),
+      panel.spacing = unit(20, 'pt'))
+#
+
+# plot diff between growth in pure vs mixed stands ------------------------------------------------------------------------------------
+
+# min, max and CI for each RCP
+df_min <- ddply(diffMix, .(rcp, propSAB, period), summarise, min = min(diffGrowth))
+df_max <- ddply(diffMix, .(rcp, propSAB, period), summarise, max = max(diffGrowth))
+df_CImin <- ddply(diffMix, .(rcp, propSAB, period), summarise, CImin = quantile(diffGrowth,0.375))
+df_CImax <- ddply(diffMix, .(rcp, propSAB, period), summarise, CImax = quantile(diffGrowth,0.625))
+dfMed <- ddply(diffMix, .(rcp, propSAB, period), summarise, med = median(diffGrowth))
+dfDiffGrowth <- cbind(df_min, 'max' = df_max$max, 'CImin' = df_CImin$CImin, 'CImax' = df_CImax$CImax, 'med' = dfMed$med)
+
+ggplot(data = dfDiffGrowth) +
+geom_ribbon(aes(x = propSAB, ymax = max, ymin = min, fill = rcp), alpha = 0.2) +
+# geom_ribbon(aes(x = propSAB, ymax = CImax, ymin = CImin, fill = rcp), alpha = 0.6) +
+geom_line(aes(x = propSAB, y = med, col = rcp), size = 1) +
+scale_color_manual(values=cbPalette) +
+scale_fill_manual(values=cbPalette) +
+facet_grid( ~ period) +
+scale_x_continuous(breaks=seq(0, 1, by = 0.1), expand = c(0, 0)) +
+scale_y_continuous(breaks=seq(0, 30, by = 2.5)) +
+xlab('proportion of fir')+
+ylab('difference of BAI (cm2) between pure and mixed stands') +
+theme_light() +
+theme(panel.grid.minor = element_blank(),
+      panel.grid.major = element_blank(),
+      strip.background = element_blank(),
+      strip.text = element_text(colour = 'black'),
+      legend.position = "bottom",
+      legend.title=element_blank(),
+      panel.spacing = unit(20, 'pt'))
+
+
+
+
+
+
+
+
+
+
+
+
+# plot Var ------------------------------------------------------------------------------------
 # min, max and CI for each RCP
 df_min <- ddply(standDf, .(rcp, propSAB, period), summarise, min = min(standVar))
 df_max <- ddply(standDf, .(rcp, propSAB, period), summarise, max = max(standVar))
@@ -153,7 +292,7 @@ theme(panel.grid.minor = element_blank(),
       panel.spacing = unit(20, 'pt'))
 
 
-# plot TS
+# plot TS ------------------------------------------------------------------------------------
 # min, max and CI for each RCP
 df_min <- ddply(standDf, .(rcp, propSAB, period), summarise, min = min(stab))
 df_max <- ddply(standDf, .(rcp, propSAB, period), summarise, max = max(stab))
@@ -180,7 +319,7 @@ theme(panel.grid.minor = element_blank(),
       legend.title=element_blank(),
       panel.spacing = unit(20, 'pt'))
 
-# plot diff --------------------------------------------------------------------
+# plot diff ------------------------------------------------------------------------------------
 # min, max and CI for each RCP
 df_min <- ddply(diffMean, .(rcp, propSAB), summarise, min = min(diffMean))
 df_max <- ddply(diffMean, .(rcp, propSAB), summarise, max = max(diffMean))
@@ -208,7 +347,7 @@ theme(panel.grid.minor = element_blank(),
       legend.title=element_blank(),
       panel.spacing = unit(20, 'pt'))
 
-# min, max and CI for each RCP
+# min, max and CI for each RCP ------------------------------------------------------------------------------------
 df_min <- ddply(diffVar, .(rcp, propSAB), summarise, min = min(diffVar))
 df_max <- ddply(diffVar, .(rcp, propSAB), summarise, max = max(diffVar))
 df_CImin <- ddply(diffVar, .(rcp, propSAB), summarise, CImin = quantile(diffVar,0.375))
@@ -234,7 +373,7 @@ theme(panel.grid.minor = element_blank(),
       legend.title=element_blank(),
       panel.spacing = unit(20, 'pt'))
 
-# min, max and CI for each RCP
+# min, max and CI for each RCP ------------------------------------------------------------------------------------
 df_min <- ddply(diffTS, .(rcp, propSAB), summarise, min = min(diffTS))
 df_max <- ddply(diffTS, .(rcp, propSAB), summarise, max = max(diffTS))
 df_CImin <- ddply(diffTS, .(rcp, propSAB), summarise, CImin = quantile(diffTS,0.375))
